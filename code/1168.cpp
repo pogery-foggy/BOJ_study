@@ -43,32 +43,24 @@ void solve() {
     int fnd = K;
     while (tree[1]) {
         int ans = find(0, N - 1, 1, fnd);
-        cout << " start " << fnd << "  " << ans << " " << tree[1] << "  end";
         answer.push_back(ans); // fnd-1을 해야하나?
         fnd += K - 1;
         update(ans);
-        if(tree[1] == 0) break;
+        if (tree[1] == 0)
+            break;
         if (!(fnd % tree[1]))
             fnd = tree[1];
         else if (fnd > tree[1])
             fnd = fnd % (tree[1]);
-
-        for (int i = 1; i < 14; i++)
-            cout << tree[i] << " ";
-        cout << "\n";
     }
 
-    cout << "<";
-    for (int i = 0; i < N - 1; i++) {
-        cout << answer[i] << ", ";
-    }
-    cout << answer[N - 1] << ">";
+    cout << answer[N - 1];
 }
 
 int main() {
-    // ios_base::sync_with_stdio(false);
-    // cin.tie(nullptr);
-    // cout.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
     init();
     solve();
     return 0;
