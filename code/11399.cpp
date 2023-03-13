@@ -4,7 +4,7 @@
 using namespace std;
 
 priority_queue<int, vector<int>, greater<int>> pq;
-int answer, N, temp;
+int answer, N, temp, total = 0;
 
 void init() {
     cin >> N;
@@ -18,7 +18,8 @@ void solve() {
         pq.push(user_in);
     }
     while (!pq.empty()) {
-        answer += answer + pq.top();
+        answer += pq.top();
+        total += answer;
         pq.pop();
     }
 }
@@ -29,6 +30,6 @@ int main() {
     cout.tie(NULL);
     init();
     solve();
-    cout << answer << "\n";
+    cout << total << "\n";
     return 0; // 정상종료시 반드시 0을 리턴해야합니다.
 }
