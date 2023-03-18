@@ -2,9 +2,7 @@
 
 using namespace std;
 
-int answer;
-
-void init() { answer = 0; }
+void init() {}
 
 void solve() {}
 
@@ -14,6 +12,6 @@ int main() {
     cout.tie(NULL);
     init();
     solve();
-    cout << answer << "\n";
+    cout << 1 << "\n";
     return 0; // 정상종료시 반드시 0을 리턴해야합니다.
 }
