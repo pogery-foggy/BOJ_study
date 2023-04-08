@@ -9,7 +9,7 @@ int main() {
     int N;
     cin >> N;
     for (int i = 0; i < N; i++) {
-        for (int j = 5 - i; j < N; j++) {
+        for (int j = N - i; j < N; j++) {
             cout << " ";
         }
         for (int j = i; j < N; j++) {
