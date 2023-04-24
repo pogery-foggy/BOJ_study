@@ -1,10 +1,17 @@
 #include <iostream>
 
 using namespace std;
+int N, M;
+void init() { cin >> N >> M; }
 
-void init() {}
-
-void solve() {}
+void solve() {
+    if (M == 1 || M == 2)
+        cout << "NEWBIE!";
+    else if (M <= N)
+        cout << "OLDBIE!";
+    else
+        cout << "TLE!";
+}
 
 int main() {
     ios_base::sync_with_stdio(false);
