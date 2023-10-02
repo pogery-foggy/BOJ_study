@@ -1,17 +1,25 @@
 #include <iostream>
-
+#include <string>
 using namespace std;
 
-void init() {}
+string s;
+int a, b;
+void init() { cin >> s >> a >> b; }
 
-void solve() {}
+void solve() {
+    for (int i = 0; i < s.size(); i++) {
+        if (!(a <= i && i < b))
+            cout << s[i];
+    }
+    cout << "\n";
+}
 
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     int T;
     cin >> T;
-    for (int testcase = 0; testcase < T; testcase++) {
+    for (int i = 0; i < T; i++) {
         init();
         solve();
     }

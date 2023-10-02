@@ -2,18 +2,20 @@
 
 using namespace std;
 
-void init() {}
+int a, b, c, maxi;
 
-void solve() {}
+void init() { cin >> a >> b >> c; }
+
+void solve() {
+    maxi = max(a, b);
+    maxi = max(maxi, c);
+    cout << (maxi * 3) - a - b - c;
+}
 
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
-    int T;
-    cin >> T;
-    for (int testcase = 0; testcase < T; testcase++) {
-        init();
-        solve();
-    }
+    init();
+    solve();
     return 0; // 정상종료시 반드시 0을 리턴해야합니다.
 }
