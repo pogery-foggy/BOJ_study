@@ -78,7 +78,7 @@ void solve() {
         }
     }
     cout << 1 << "\n";
-    // reverse 쓰지마라 뒤지기싫으면
+    // reverse 쓰지마라 뒤지기싫으면 그래서 reverse안쓰고 [b]=1, [b^1] = 0
     for (auto a : SCC) {
         for (auto b : a) {
             if (!visit_answer[b]) {
