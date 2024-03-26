@@ -6,12 +6,14 @@ int tree[MAX_N * 4];
 int N, M;
 int arr[MAX_N], query[100001], posi[100001];
 
+// 0부터 시작이 아니니까 비트로 하면 안된다.
+
 int init_tree(int s, int e, int node) {
     if (s == e) {
         return tree[node] = arr[s];
     }
-    int mid = (s + e) >> 1;
-    return tree[node] = init_tree(s, mid, node >> 1) + init_tree(mid + 1, e, node >> 1 | 1);
+    int mid = (s + e) / 2;
+    return tree[node] = init_tree(s, mid, node * 2) + init_tree(mid + 1, e, node * 2 + 1);
 }
 
 void init() {
@@ -34,9 +36,9 @@ void update(int s, int e, int idx, int diff, int node) {
     if (s <= idx && idx <= e) {
         tree[node] += diff;
         if (s != e) {
-            int mid = (s + e) >> 1;
-            update(s, mid, idx, diff, node >> 1);
-            update(mid + 1, e, idx, diff, node >> 1 | 1);
+            int mid = (s + e) / 2;
+            update(s, mid, idx, diff, node * 2);
+            update(mid + 1, e, idx, diff, node * 2 + 1);
         }
     }
 }
@@ -47,9 +49,9 @@ int sum(int s, int e, int l, int r, int node) {
     if (l <= s && e <= r)
         return tree[node];
 
-    int mid = (s + e) >> 1;
+    int mid = (s + e) / 2;
 
-    return sum(s, mid, l, r, node >> 1) + sum(mid + 1, e, l, r, node >> 1 | 1);
+    return sum(s, mid, l, r, node * 2) + sum(mid + 1, e, l, r, node * 2 + 1);
 }
 
 void solve() {
@@ -57,6 +59,8 @@ void solve() {
         int cur = query[i];
         int cur_position = posi[cur];
         int next_position = N + i + 1;
+        arr[cur_position] = 0;
+        arr[next_position] = 1;
         update(1, N + M, cur_position, -1, 1);
         update(1, N + M, next_position, 1, 1);
         posi[cur] = next_position;
