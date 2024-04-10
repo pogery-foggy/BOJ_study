@@ -2,12 +2,13 @@
 
 using namespace std;
 
-void init() {}
+void init() {
+}
 
-void solve() {}
+void solve() {
+}
 
-int main() {
-    ios_base::sync_with_stdio(false);
+int main() {ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     int T;
     cin >> T;
@@ -16,4 +17,4 @@ int main() {
         solve();
     }
     return 0; // 정상종료시 반드시 0을 리턴해야합니다.
-}
+}asd
