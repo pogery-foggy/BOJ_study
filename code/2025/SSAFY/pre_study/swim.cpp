@@ -1,7 +1,7 @@
 #include <iostream>
 #include <queue>
 using namespace std;
-typedef pair<pair<int, int>, int> piii;
+typedef pair<int, pair<int, int>> piii;
 int N, map[15][15], sx, sy, ex, ey;
 int is_visit[15][15];
 int dx[] = {0, 0, -1, 1};
@@ -25,13 +25,13 @@ bool is_valid(int y, int x) {
 }
 
 int bfs(int y, int x) {
-    queue<piii> q;
-    q.push({{sy, sx}, 0});
+    priority_queue<piii, vector<piii>, greater<piii>> q;
+    q.push({0, {sy, sx}});
     is_visit[sy][sx] = true;
     while (!q.empty()) {
-        int cur_y = q.front().first.first;
-        int cur_x = q.front().first.second;
-        int cnt = q.front().second;
+        int cur_y = q.top().second.first;
+        int cur_x = q.top().second.second;
+        int cnt = q.top().first;
         q.pop();
         if (cur_x == ex && cur_y == ey)
             return cnt;
@@ -42,16 +42,14 @@ int bfs(int y, int x) {
                 continue;
             if (map[ny][nx] == 1)
                 continue;
+            if (is_visit[ny][nx])
+                continue;
             if (map[ny][nx] == 2) {
-                if (!((cnt + 1) % 3)) {
-                    q.push({{ny, nx}, cnt + 1});
-                    is_visit[ny][nx] = true;
-                } else
-                    q.push({{cur_y, cur_x}, cnt + 1});
-            } else if (!is_visit[ny][nx]) {
-                q.push({{ny, nx}, cnt + 1});
-                is_visit[ny][nx] = true;
+                q.push({(cnt / 3 + 1) * 3, {ny, nx}});
+            } else {
+                q.push({cnt + 1, {ny, nx}});
             }
+            is_visit[ny][nx] = true;
         }
     }
     return -1;
