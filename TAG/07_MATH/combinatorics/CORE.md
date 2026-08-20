@@ -16,19 +16,27 @@
 - 경계는 `C(n,0)=C(n,n)=1`이고 대칭성 `C(n,k)=C(n,n-k)`가 있다.
 - 작은 입력에서만 `n!/(k!(n-k)!)`를 정수형으로 직접 계산해도 안전하다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [11050.cpp](./11050.cpp)의 짧은 `pac(int x)` 함수, 감소하는 `for`문, `main()`에서 식을 바로 조립하는 방식을 그대로 축약했다. 이 폴더의 유일한 실제 풀이를 기준으로 삼았다.
 
 ```cpp
-long long comb[101][101]{};
-for (int n = 0; n <= N; ++n) {
-    comb[n][0] = comb[n][n] = 1;
-    for (int k = 1; k < n; ++k) {
-        comb[n][k] = comb[n - 1][k - 1] + comb[n - 1][k];
-        // 모듈러 문제라면 여기서 %= MOD
-    }
+int pac(int x) {
+    int answer = 1;
+    for (int i = x; i > 0; i--)
+        answer *= i;
+    return answer;
 }
-cout << comb[N][K];
+
+int main() {
+    int N, K, result;
+    cin >> N >> K;
+    result = pac(N) / (pac(K) * pac(N - K));
+    cout << result;
+}
 ```
+
+이 골격은 [11050.cpp](./11050.cpp)처럼 `N <= 10`이라 팩토리얼이 `int`에 들어갈 때만 쓴다. 큰 이항계수는 [2407.cpp](../big_integer/2407.cpp)의 전역 `string arr[101][101]`, 재귀 `ncm`, 뒤집힌 문자열 `sum` 방식으로 넘어가야 한다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -49,4 +57,3 @@ cout << comb[N][K];
 
 - [11050.cpp](./11050.cpp): 입력이 작을 때 팩토리얼 정의를 그대로 계산한 기본 예시
 - 큰 값이 필요하면 [../big_integer/2407.cpp](../big_integer/2407.cpp)의 파스칼 점화식과 큰 수 덧셈을 함께 본다.
-

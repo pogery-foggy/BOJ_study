@@ -17,43 +17,30 @@
 - 여러 블록을 왼쪽으로 밀 때는 높은 블록부터 처리해야 아직 읽지 않은 carry를 망가뜨리지 않는다.
 - 비트셋 LCS에서는 비트 하나가 DP 값 자체가 아니라 LCS 값이 증가하는 열의 경계를 뜻한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [13701.cpp](13701.cpp)의 전역 `bitset`과 입력값 `x`, 비어 있는 `init()` 뒤 `solve()`에서 입력이 끝날 때까지 처리하는 구조를 그대로 축약했다.
 
 ```cpp
-using ull = unsigned long long;
+#include <iostream>
+#include <bitset>
+using namespace std;
 
-struct Bits {
-    vector<ull> b;
-    explicit Bits(int n) : b((n + 63) / 64, 0) {}
+bitset<1 << 25> arr;
+int x;
 
-    bool test(int x) const {
-        return (b[x >> 6] >> (x & 63)) & 1ULL;
-    }
-    void set(int x) {
-        b[x >> 6] |= 1ULL << (x & 63);
-    }
-    int count() const {
-        int ret = 0;
-        for (ull x : b) ret += __builtin_popcountll(x);
-        return ret;
-    }
-};
+void init() {}
 
-Bits seen(MAX_VALUE + 1);
-for (int x; cin >> x; ) {
-    if (seen.test(x)) continue;
-    seen.set(x);
-    cout << x << ' ';
+void solve() {
+    while(cin >> x){
+        if(arr[x]) continue;
+        arr.set(x);
+        cout << x << " ";
+    }
 }
 ```
 
-고급 LCS 압축의 한 행 갱신은 사용자 코드의 다음 식으로 돌아온다.
-
-```cpp
-x = boundary | match[ch];
-y = (boundary << 1) | 1;
-boundary = x ^ (x & (x - y));  // 다중 블록 뺄셈의 borrow 처리 필요
-```
+직접 비트 블록을 관리해야 하는 문제와 달리, 이 골격은 값의 범위가 고정되어 있을 때 `bitset` 자체의 `[]`와 `set()`을 쓰는 사용자 풀이 방식이다.
 
 ## 빈 화면 구현 순서
 

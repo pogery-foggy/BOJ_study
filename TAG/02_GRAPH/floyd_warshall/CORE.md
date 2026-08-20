@@ -17,22 +17,45 @@
 - 전이: `dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])`.
 - 도달성만 필요하면 `reach[i][j] |= reach[i][k] && reach[k][j]`로 바뀐다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-현재 폴더의 `2458.cpp`는 0바이트라 사용자 구현을 복원할 근거가 없다. 아래는 다시 작성할 수 있는 기본 골격이다.
+현재 [2458.cpp](./2458.cpp)는 0바이트이므로 Floyd–Warshall에 대한 사용자 구현 근거는 없다.
+
+스타일 근거: 같은 최단 거리 코드인 [1753.cpp](../dijkstra/1753.cpp)의 `INF` 매크로, 전역 거리 저장소, `init()`/알고리즘 함수 분리를 따랐다. Floyd–Warshall의 삼중 반복 논리 자체는 표준 골격이다.
 
 ```cpp
-const long long INF = (1LL << 60);
-vector<vector<long long>> dist(n + 1, vector<long long>(n + 1, INF));
-for (int i = 1; i <= n; ++i) dist[i][i] = 0;
-for (auto [u, v, w] : edges) dist[u][v] = min(dist[u][v], (long long)w);
+#define MAX_N 501
+#define INF 1000000000
 
-for (int k = 1; k <= n; ++k)
-    for (int i = 1; i <= n; ++i)
-        for (int j = 1; j <= n; ++j) {
-            if (dist[i][k] == INF || dist[k][j] == INF) continue;
-            dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+int dist[MAX_N][MAX_N];
+int N, M;
+
+void init() {
+    cin >> N >> M;
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= N; j++) {
+            if (i == j) dist[i][j] = 0;
+            else dist[i][j] = INF;
         }
+    }
+    for (int i = 0; i < M; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        dist[u][v] = min(dist[u][v], w);
+    }
+}
+
+void floyd_warshall() {
+    for (int k = 1; k <= N; k++) {
+        for (int i = 1; i <= N; i++) {
+            for (int j = 1; j <= N; j++) {
+                if (dist[i][k] == INF || dist[k][j] == INF)
+                    continue;
+                dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+            }
+        }
+    }
+}
 ```
 
 ## 빈 화면 구현 순서

@@ -17,31 +17,49 @@
 - 모두 방문했을 때 `cur -> start` 간선이 없으면 `INF`다.
 - 방문하지 않은 `next`만 골라 `cost[cur][next] + dfs(next, mask | 1<<next)`로 전이한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[2098.cpp](./2098.cpp)의 메모이제이션 DFS 구조다.
+스타일 근거: [2098.cpp](./2098.cpp)의 `MAX_N`/`INF` 매크로, 전역 `dp`와 `W`, 방문 집합 이름 `is_visit`, 참조 변수 없이 배열을 직접 갱신하는 재귀 `dfs()` 구조를 보존했다.
 
 ```cpp
-const int INF = 1e9;
-vector<vector<int>> memo(n, vector<int>(1 << n, -1));
+#define MAX_N 16
+#define INF 90000000
 
-int dfs(int cur, int mask) {
-    if (mask == (1 << n) - 1)
-        return w[cur][0] ? w[cur][0] : INF;
+int dp[MAX_N][1 << MAX_N];
+int W[MAX_N][MAX_N];
+int N;
 
-    int &ret = memo[cur][mask];
-    if (ret != -1) return ret;
-    ret = INF;
-
-    for (int next = 0; next < n; ++next) {
-        if (mask & (1 << next)) continue;
-        if (w[cur][next] == 0) continue;
-        ret = min(ret, w[cur][next] + dfs(next, mask | (1 << next)));
+void init() {
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++)
+            cin >> W[i][j];
     }
-    return ret;
+    memset(dp, -1, sizeof(dp));
 }
 
-cout << dfs(0, 1 << 0);
+int dfs(int cur, int is_visit) {
+    if (is_visit == (1 << N) - 1) {
+        if (W[cur][0] == 0)
+            return INF;
+        return W[cur][0];
+    }
+    if (dp[cur][is_visit] != -1)
+        return dp[cur][is_visit];
+
+    dp[cur][is_visit] = INF;
+    for (int i = 0; i < N; i++) {
+        if (W[cur][i] == 0)
+            continue;
+        if ((is_visit & (1 << i)) == (1 << i))
+            continue;
+        dp[cur][is_visit] = min(dp[cur][is_visit],
+            W[cur][i] + dfs(i, is_visit | (1 << i)));
+    }
+    return dp[cur][is_visit];
+}
+
+void solve() { cout << dfs(0, 1); }
 ```
 
 ## 빈 화면 구현 순서

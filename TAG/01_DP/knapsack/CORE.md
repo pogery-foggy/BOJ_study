@@ -17,30 +17,40 @@
 - 그래서 0/1 배낭은 `w`를 내림차순, 무한 사용은 오름차순으로 돈다.
 - 비용 최소화형은 가치/효과를 축으로 뒤집어 상태를 잡을 수도 있다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[12865.cpp](./12865.cpp)의 2차원 전이를 메모리 `O(K)`로 줄인 0/1 골격이다.
+스타일 근거: [12865.cpp](./12865.cpp)의 `W`/`V` 매크로, 전역 2차원 배열, 1부터 도는 이중 `for`문, `init()`/`solve()` 분리를 그대로 축약했다. 메모리 최적화보다 실제로 작성한 2차원 상태를 우선했다.
 
 ```cpp
-vector<long long> dp(K + 1, 0);
+#define W 0
+#define V 1
 
-for (auto [weight, value] : item) {
-    for (int w = K; w >= weight; --w) { // 0/1: 반드시 역순
-        dp[w] = max(dp[w], dp[w - weight] + value);
+int N, K;
+int knapsack[101][100001];
+int item[101][2];
+
+void init() {
+    cin >> N >> K;
+    for (int i = 1; i <= N; i++) {
+        cin >> item[i][W] >> item[i][V];
     }
 }
-cout << dp[K];
+
+void solve() {
+    for (int i = 1; i <= N; i++) {
+        for (int w = 1; w <= K; w++) {
+            if (item[i][W] <= w)
+                knapsack[i][w] = max(knapsack[i - 1][w],
+                    knapsack[i - 1][w - item[i][W]] + item[i][V]);
+            else
+                knapsack[i][w] = knapsack[i - 1][w];
+        }
+    }
+    cout << knapsack[N][K];
+}
 ```
 
-경우의 수를 세며 동전을 여러 번 쓸 수 있다면 순서가 반대다.
-
-```cpp
-vector<long long> ways(K + 1);
-ways[0] = 1;
-for (int coin : coins)
-    for (int w = coin; w <= K; ++w) // 완전 배낭: 정순
-        ways[w] += ways[w - coin];
-```
+동전을 여러 번 쓰는 경우의 수는 [3067.cpp](./3067.cpp)처럼 `dp[i][j] = dp[i - 1][j]`로 먼저 복사한 뒤 같은 행의 `dp[i][j - coin[i]]`를 더한다.
 
 ## 빈 화면 구현 순서
 
@@ -65,4 +75,3 @@ for (int coin : coins)
 - [3067.cpp](./3067.cpp): 동전 경우의 수 형태
 - [1106.cpp](./1106.cpp): 목표 효과를 채우는 최소 비용 형태
 - [17845.cpp](./17845.cpp): 제한 시간 안에서 가치 최대화
-

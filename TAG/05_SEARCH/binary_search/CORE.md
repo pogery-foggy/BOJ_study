@@ -17,31 +17,44 @@
 - 최솟값 탐색: `ok(mid)`면 `answer=mid`, 더 작은 쪽 `hi=mid-1`.
 - `mid = lo + (hi-lo)/2`; 합계와 범위는 보통 `long long`이다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1654.cpp](./1654.cpp)의 전역 `l, r, mid, answer`, 고정 배열, 판정을 `solve()`의 반복문 안에서 바로 계산하는 구조를 축약했다.
 
 ```cpp
-bool ok(long long x) {
-    long long count = 0;
-    for (long long v : a) {
-        count += v / x;
-        if (count >= need) return true; // 합계 overflow도 예방
+#define MAX_N 10000
+
+int K, N, k_arr[MAX_N], max_stick = -1;
+long long l, r, mid, answer, rotn;
+
+void init() {
+    cin >> K >> N;
+    for (int i = 0; i < K; i++) {
+        cin >> k_arr[i];
+        max_stick = max_stick > k_arr[i] ? max_stick : k_arr[i];
     }
-    return false;
+    l = 1;
+    r = max_stick;
 }
 
-long long lo = 1, hi = upper, answer = 0;
-while (lo <= hi) {
-    long long mid = lo + (hi - lo) / 2;
-    if (ok(mid)) {
-        answer = mid;      // 가능한 최대값
-        lo = mid + 1;
-    } else {
-        hi = mid - 1;
+void solve() {
+    while (l <= r) {
+        mid = (l + r) >> 1;
+        rotn = 0;
+        for (int i = 0; i < K; i++)
+            rotn += k_arr[i] / mid;
+
+        if (rotn >= N) {
+            l = mid + 1;
+            answer = mid > answer ? mid : answer;
+        } else
+            r = mid - 1;
     }
+    cout << answer;
 }
 ```
 
-K번째 수처럼 “`mid` 이하 원소가 K개 이상”인 첫 값을 찾을 때는 조건이 참이면 `answer=mid; hi=mid-1`로 움직인다.
+원본의 흐름은 유지하되, 잘라 만든 개수 `rotn`은 합이 커질 수 있으므로 골격에서는 `long long`으로 넓혔다. K번째 수처럼 처음 참인 값을 찾을 때는 [1300.cpp](./1300.cpp)의 `p(mid)`처럼 판정을 함수로 빼고 참이면 `answer=mid; r=mid-1`로 움직인다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -64,4 +77,3 @@ K번째 수처럼 “`mid` 이하 원소가 K개 이상”인 첫 값을 찾을 
 - [1654.cpp](./1654.cpp): 만들 수 있는 개수가 단조 감소하는 최대 길이 탐색
 - [1300.cpp](./1300.cpp): `mid` 이하 개수를 세어 K번째 값의 최소 경계 탐색
 - [10815.cpp](./10815.cpp): 정렬된 배열에서 값 존재 여부 탐색
-

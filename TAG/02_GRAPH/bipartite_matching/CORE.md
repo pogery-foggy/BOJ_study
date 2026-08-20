@@ -12,43 +12,53 @@
 
 ## 핵심 상태와 불변식
 
-- `matchR[v]`: 오른쪽 정점 `v`와 현재 짝인 왼쪽 정점, 없으면 `-1`.
+- 골격의 `connect[v]`: 오른쪽 정점 `v`와 현재 짝인 왼쪽 정점, 없으면 1-based 정점과 겹치지 않는 `0`.
 - 한 번의 증강 시도에서 `seen[v]`는 같은 오른쪽 정점을 재귀적으로 다시 파고들지 않게 한다.
 - `dfs(u)`는 `u`를 포함하도록 현재 매칭을 재배치할 수 있으면 참이다.
 - 성공한 증강 경로는 매칭 간선/비매칭 간선을 번갈아 뒤집어 크기를 정확히 1 늘린다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-현재 폴더의 `1017.cpp`는 0바이트라 사용자 구현을 복원할 근거가 없다. 아래는 다시 시작할 수 있는 기본 Kuhn 골격이다.
+현재 [1017.cpp](./1017.cpp)는 0바이트이므로 이분 매칭에 대한 사용자 구현 근거는 없다.
+
+스타일 근거: 같은 그래프 재귀 탐색 코드인 [2150.cpp](../scc/2150.cpp)의 전역 인접 리스트·전역 배열·`dfs()`·범위 기반 순회를 따랐다. 이분 매칭 알고리즘 논리 자체는 표준 Kuhn 골격이다.
 
 ```cpp
-vector<vector<int>> adj(L);
-vector<int> matchR(R, -1);
-vector<char> seen(R);
+#define MAX_N 1001
 
-bool augment(int u) {
-    for (int v : adj[u]) {
-        if (seen[v]) continue;
-        seen[v] = true;
-        if (matchR[v] == -1 || augment(matchR[v])) {
-            matchR[v] = u;
+vector<int> edge[MAX_N];
+int connect[MAX_N];
+bool is_visit[MAX_N];
+int L, R;
+
+bool dfs(int cur) {
+    for (auto next : edge[cur]) {
+        if (is_visit[next])
+            continue;
+        is_visit[next] = true;
+        if (connect[next] == 0 || dfs(connect[next])) {
+            connect[next] = cur;
             return true;
         }
     }
     return false;
 }
 
-int matching = 0;
-for (int u = 0; u < L; ++u) {
-    fill(seen.begin(), seen.end(), false);
-    matching += augment(u);
+void solve() {
+    int answer = 0;
+    for (int i = 1; i <= L; i++) {
+        for (int j = 1; j <= R; j++)
+            is_visit[j] = false;
+        if (dfs(i)) answer++;
+    }
+    cout << answer;
 }
 ```
 
 ## 빈 화면 구현 순서
 
 1. 좌우 집합을 명확히 나누고 간선 조건을 만든다.
-2. 오른쪽 기준 매칭 배열을 `-1`로 초기화한다.
+2. 오른쪽 기준 `connect` 배열을 `0`으로 초기화한다. 0-based 정점을 쓰면 대신 `-1`을 쓴다.
 3. 한 왼쪽 정점에서 갈 수 있는 오른쪽을 순회한다.
 4. 비어 있거나 기존 상대를 다른 곳으로 옮길 수 있으면 매칭한다.
 5. 왼쪽 정점마다 `seen`을 새로 초기화해 증강을 시도한다.

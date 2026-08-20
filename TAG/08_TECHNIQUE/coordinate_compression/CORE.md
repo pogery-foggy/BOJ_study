@@ -16,22 +16,33 @@
 - `lower_bound(compressed, x)`의 인덱스는 x보다 작은 서로 다른 값의 수다.
 - `x<y`이면 압축 후 인덱스도 반드시 작다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [18870.cpp](./18870.cpp)의 전역 `arr, cpy`, 입력값을 두 벡터에 동시에 `push_back`, `solve()`에서 `sort`/`unique`, 범위 `for (auto ans : arr)` 출력 구조를 그대로 축약했다. 이 폴더의 실제 풀이를 그대로 기준으로 삼았다.
 
 ```cpp
-vector<long long> original(n), compressed;
-for (auto& x : original) cin >> x;
+vector<int> arr, cpy;
+int N;
 
-compressed = original;
-sort(compressed.begin(), compressed.end());
-compressed.erase(unique(compressed.begin(), compressed.end()), compressed.end());
+void init() {
+    int user_in;
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        cin >> user_in;
+        arr.push_back(user_in);
+        cpy.push_back(user_in);
+    }
+}
 
-for (long long x : original) {
-    int rank = lower_bound(compressed.begin(), compressed.end(), x)
-             - compressed.begin();
-    cout << rank << ' ';
+void solve() {
+    sort(cpy.begin(), cpy.end());
+    cpy.erase(unique(cpy.begin(), cpy.end()), cpy.end());
+    for (auto ans : arr)
+        cout << lower_bound(cpy.begin(), cpy.end(), ans) - cpy.begin() << " ";
 }
 ```
+
+좌표 값 자체가 `int` 범위를 넘는 문제에서만 두 벡터의 원소형을 함께 `long long`으로 바꾼다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -52,4 +63,3 @@ for (long long x : original) {
 
 - [18870.cpp](./18870.cpp): 복사·정렬·중복 제거·`lower_bound`의 정석 흐름
 - 응용은 [../inversion_counting/2517.cpp](../inversion_counting/2517.cpp): 값을 순위로 바꾼 뒤 구간 개수 자료구조에 연결
-

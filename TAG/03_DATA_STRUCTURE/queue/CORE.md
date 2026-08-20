@@ -16,25 +16,72 @@
 - 시뮬레이션에서 큐의 `front()`는 그쪽에서 가장 먼저 도착한 사람이다.
 - 답을 원래 입력 순서로 내야 하면 큐에는 값 대신 입력 인덱스를 넣는다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [2065.cpp](2065.cpp)의 `queue<int> q[2]`, 입력 순서를 보존하는 `vector<pair<int, string>> user_in`, 전역 `isleft`, `time`, `answer`와 명시적인 정원 반복문을 축약했다.
 
 ```cpp
-queue<int> q;
-for (int i = 0; i < n; ++i) q.push(i);
+using namespace std;
 
-while (!q.empty()) {
-    int cur = q.front();
-    q.pop();
+int M, t, N, time;
+vector<pair<int, string>> user_in;
+queue<int> q[2];
+bool isleft, flag;
+int answer[10001];
 
-    if (can_process(cur, now)) {
-        answer[cur] = now;
-    } else {
-        q.push(cur); // 정말 다시 기다려야 하는 문제에서만
+void init() {
+    cin >> M >> t >> N;
+    for (int i = 0; i < N; i++) {
+        int a;
+        string b;
+        cin >> a >> b;
+        user_in.push_back(make_pair(a, b));
+        if (b == "left") q[0].push(i);
+        else q[1].push(i);
+    }
+}
+
+void solve() {
+    while (1) {
+        if (q[0].empty() && q[1].empty())
+            break;
+        flag = false;
+
+        if (!q[isleft].empty()) {
+            for (int i = M; i > 0; i--) {
+                if (!q[isleft].empty()
+                    && user_in[q[isleft].front()].first <= time) {
+                    answer[q[isleft].front()] = time + t;
+                    q[isleft].pop();
+                    flag = true;
+                } else {
+                    break;
+                }
+            }
+
+            if (flag) {
+                time += t;
+                isleft = !isleft;
+            } else if (!q[!isleft].empty()) {
+                if (user_in[q[isleft].front()].first
+                    <= user_in[q[!isleft].front()].first) {
+                    time += max(0, user_in[q[isleft].front()].first - time);
+                } else {
+                    time += t + max(0, user_in[q[!isleft].front()].first - time);
+                    isleft = !isleft;
+                }
+            } else {
+                time += max(0, user_in[q[isleft].front()].first - time);
+            }
+        } else if (!q[!isleft].empty()) {
+            time += t + max(0, user_in[q[!isleft].front()].first - time);
+            isleft = !isleft;
+        }
     }
 }
 ```
 
-양쪽 대기열 시뮬레이션은 `queue<int> q[2]`에 입력 인덱스를 넣고, 현재 쪽에서 `arrival[q[side].front()] <= now`인 원소만 정원만큼 꺼낸다.
+[2065.cpp](2065.cpp)의 `flag`와 중첩 분기를 그대로 남겼다. 현재 편 큐가 비었는지는 바깥 `if`, 반대편 큐는 각각의 `!empty()` 조건에서 먼저 검사하므로 근거 없는 별도 “안전 교정”은 넣지 않았다.
 
 ## 빈 화면 구현 순서
 

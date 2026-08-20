@@ -16,27 +16,47 @@
 - 안쪽 검증은 그 후보의 비용·가능 여부만 계산하며 다른 후보의 상태를 섞지 않는다.
 - 최적답 갱신 기준과 동률 규칙을 한 조건에 명시한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [18111.cpp](./18111.cpp)의 전역 2차원 배열과 `answer[2]`, `init()`에서 최솟값 초기화, 후보 높이를 바깥 반복문에서 전부 확인하는 구조를 축약했다.
 
 ```cpp
-long long bestCost = LLONG_MAX;
-int bestCandidate = -1;
+int arr[501][501];
+int N, M, B, answer[2];
 
-for (int cand = low; cand <= high; ++cand) {
-    long long cost = 0;
-    bool possible = true;
-    for (const auto& item : items) {
-        // possible과 cost 계산
+void init() {
+    cin >> N >> M >> B;
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < M; j++)
+            cin >> arr[i][j];
+    answer[0] = 2147483647;
+}
+
+void solve() {
+    for (int h = 0; h <= 256; h++) {
+        int b = 0, d = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                int y = arr[i][j] - h;
+                if (y > 0)
+                    d += arr[i][j] - h;
+                else if (y < 0)
+                    b += h - arr[i][j];
+            }
+        }
+        if (b <= B + d) {
+            int t = d * 2 + b;
+            if (answer[0] >= t) {
+                answer[0] = t;
+                answer[1] = h;
+            }
+        }
     }
-    if (!possible) continue;
-    if (cost < bestCost || (cost == bestCost && cand > bestCandidate)) {
-        bestCost = cost;
-        bestCandidate = cand;
-    }
+    cout << answer[0] << " " << answer[1];
 }
 ```
 
-정확히 두 개를 제외하는 문제라면 `for (i) for (j=i+1)`처럼 조합만 훑는다. 순서가 무의미하면 `(i,j)`와 `(j,i)`를 둘 다 만들지 않는다.
+동률일 때 높은 높이를 남기는 습관도 원본처럼 `>=`와 오름차순 후보 순회로 표현했다. 두 개를 제외하는 문제는 [2309.cpp](./2309.cpp)처럼 `for (i)`, `for (j=i+1)`만 돈다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -58,4 +78,3 @@ for (int cand = low; cand <= high; ++cand) {
 
 - [2309.cpp](./2309.cpp): 9명 중 제외할 두 명을 `i<j`로 전부 검사
 - [18111.cpp](./18111.cpp): 가능한 모든 높이의 시간·인벤토리를 계산하고 동률이면 높은 높이 선택
-

@@ -16,29 +16,52 @@
 - 네 ccw가 모두 0이면 일직선이므로 x와 y 투영 구간이 모두 겹쳐야 한다.
 - 교점 좌표는 무한 직선의 행렬식 공식으로 구하되, 겹치는 선분이 한 점에서만 만날 때만 그 점을 출력한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [17387.cpp](17387.cpp)의 `Point`, 전역 네 끝점, 벡터 성분을 풀어 쓴 `ccw`, 네 방향값을 개별 변수로 저장한 뒤 `cond1`, `cond2`로 판정하는 `solve()`를 그대로 축약했다.
 
 ```cpp
-struct Point { long long x, y; };
+struct Point {
+    long long x, y;
+};
+Point a1, b1, a2, b2;
 
-long long cross(Point a, Point b, Point c) {
-    return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+long long ccw(Point a, Point b, Point c) {
+    long long x1 = b.x - a.x;
+    long long y1 = b.y - a.y;
+    long long x2 = c.x - a.x;
+    long long y2 = c.y - a.y;
+    long long result = x1 * y2 - x2 * y1;
+    if (result < 0) return -1;
+    else if (result == 0) return 0;
+    else return 1;
 }
-int sign(long long x) { return (x > 0) - (x < 0); }
 
-bool intersect(Point a, Point b, Point c, Point d) {
-    int ab1=sign(cross(a,b,c)), ab2=sign(cross(a,b,d));
-    int cd1=sign(cross(c,d,a)), cd2=sign(cross(c,d,b));
+void solve() {
+    int L1a2 = ccw(a1, b1, a2);
+    int L1b2 = ccw(a1, b1, b2);
+    int L2a1 = ccw(a2, b2, a1);
+    int L2b1 = ccw(a2, b2, b1);
+    int cond1 = L1a2 * L1b2;
+    int cond2 = L2a1 * L2b1;
 
-    if (ab1==0 && ab2==0 && cd1==0 && cd2==0) {
-        return max(min(a.x,b.x), min(c.x,d.x)) <=
-               min(max(a.x,b.x), max(c.x,d.x)) &&
-               max(min(a.y,b.y), min(c.y,d.y)) <=
-               min(max(a.y,b.y), max(c.y,d.y));
+    if (cond1 == 0 && cond2 == 0) {
+        if (max(a1.x, b1.x) < min(a2.x, b2.x)
+         || max(a2.x, b2.x) < min(a1.x, b1.x)
+         || max(a1.y, b1.y) < min(a2.y, b2.y)
+         || max(a2.y, b2.y) < min(a1.y, b1.y))
+            cout << 0;
+        else
+            cout << 1;
+    } else if (cond1 <= 0 && cond2 <= 0) {
+        cout << 1;
+    } else {
+        cout << 0;
     }
-    return ab1*ab2 <= 0 && cd1*cd2 <= 0;
 }
 ```
+
+원본에 주석 처리되어 있던 디버그 `cout`은 골격에 복제하지 않았다. 교점 좌표까지 필요하면 [20149.cpp](20149.cpp)의 실수/정확한 끝점 처리를 이어서 본다.
 
 ## 빈 화면 구현 순서
 

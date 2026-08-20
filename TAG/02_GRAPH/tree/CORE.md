@@ -17,25 +17,37 @@
 - 가중치가 없으면 BFS/DFS로 처음 도달한 경로가 유일한 경로다.
 - 후위 처리에서는 모든 자식의 값이 끝난 뒤 현재 서브트리 값을 계산한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[2644.cpp](./2644.cpp)의 BFS 거리 계산을 일반화했다.
+스타일 근거: [2644.cpp](./2644.cpp)의 `vector<vector<int>> edge`, 전역 `is_visit`, 함수 내부 `queue<pair<int, int>>`, `cur`/`idx` 명명과 거리 발견 즉시 반환하는 `bfs()` 구조를 보존했다.
 
 ```cpp
-vector<int> parent(n + 1, -1), depth(n + 1, -1);
-queue<int> q;
-depth[root] = 0;
-q.push(root);
+vector<vector<int>> edge;
+bool is_visit[101];
+int N, s, e;
 
-while (!q.empty()) {
-    int u = q.front(); q.pop();
-    for (int v : tree[u]) {
-        if (v == parent[u]) continue;
-        parent[v] = u;
-        depth[v] = depth[u] + 1;
-        q.push(v);
+int bfs() {
+    queue<pair<int, int>> q;
+    q.push({s, 0});
+    is_visit[s] = true;
+    while (!q.empty()) {
+        int cur = q.front().first;
+        int idx = q.front().second;
+        q.pop();
+        if (cur == e)
+            return idx;
+
+        for (auto a : edge[cur]) {
+            if (!is_visit[a]) {
+                q.push({a, idx + 1});
+                is_visit[a] = true;
+            }
+        }
     }
+    return -1;
 }
+
+void solve() { cout << bfs(); }
 ```
 
 ## 빈 화면 구현 순서
@@ -58,4 +70,3 @@ while (!q.empty()) {
 ## 대표 로컬 풀이
 
 - [2644.cpp](./2644.cpp): 유일 경로의 간선 수를 BFS로 구하는 현재 폴더의 구현
-

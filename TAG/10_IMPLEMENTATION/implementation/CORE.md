@@ -17,27 +17,28 @@
 - 문제의 조건 검사 순서를 코드의 분기 순서와 맞춘다.
 - 같은 자원을 합쳐 쓸 수 있으면 빈도 배열에서 먼저 통합한 뒤 최대값을 구한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1475.cpp](./1475.cpp)의 전역 문자열과 고정 빈도 배열, `init()`/`solve()` 분리, 범위 `for`로 센 뒤 특수한 두 상태를 합치고 삼항식으로 최댓값을 갱신하는 구조를 축약했다.
 
 ```cpp
-bool validLine(const vector<int>& line, int L) {
-    vector<bool> used(line.size(), false);
-    for (int i = 1; i < (int)line.size(); ++i) {
-        int diff = line[i] - line[i - 1];
-        if (abs(diff) > 1) return false;
-        if (diff == 1) {
-            for (int k = i - L; k < i; ++k)
-                if (k < 0 || line[k] != line[i - 1] || used[k]) return false;
-                else used[k] = true;
-        } else if (diff == -1) {
-            for (int k = i; k < i + L; ++k)
-                if (k >= line.size() || line[k] != line[i] || used[k]) return false;
-                else used[k] = true;
-        }
-    }
-    return true;
+string N;
+int arr[10], maxed = -1;
+
+void init() { cin >> N; }
+
+void solve() {
+    for (auto a : N)
+        arr[a - '0']++;
+
+    arr[6] += arr[9] + 1;
+    arr[6] /= 2;
+    for (int i = 0; i < 9; i++)
+        maxed = maxed > arr[i] ? maxed : arr[i];
 }
 ```
+
+큰 격자 조건 구현도 [14890.cpp](./14890.cpp)처럼 전역 `map`/`is_used`, 명시적인 중첩 `for`, `flag`/`cnt` 상태를 사용한다. 현재 골격의 목적은 문제 문장의 예외 규칙을 먼저 빈도·상태 갱신 순서로 번역하는 사용자 습관을 보여 주는 것이다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -60,4 +61,3 @@ bool validLine(const vector<int>& line, int L) {
 - [1475.cpp](./1475.cpp): 숫자 빈도를 센 뒤 6과 9를 합쳐 필요한 세트 수 계산
 - [14890.cpp](./14890.cpp): 높이 차, 연속 길이, 경사로 재사용 여부를 상태로 판정
 - [2669.cpp](./2669.cpp): 작은 격자를 직접 표시해 사각형 합집합 넓이를 구현
-

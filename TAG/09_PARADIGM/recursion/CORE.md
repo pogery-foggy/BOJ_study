@@ -17,22 +17,36 @@
 - 각 호출은 반드시 기저에 가까워지는 인자를 넘긴다.
 - 전위·중위·후위 순서는 “현재 노드 처리”를 재귀 호출 어디에 놓는지로 결정된다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [17478.cpp](./17478.cpp)의 전역 `N`, 깊이를 `cnt` 하나로 넘기는 `solve(int cnt)`, 기저에서 출력 후 `return`, 재귀 호출 전·후에 같은 들여쓰기를 직접 출력하는 구조를 축약했다.
 
 ```cpp
-void traverse(Node* cur, int depth) {
-    if (cur == nullptr) return;
+int N;
 
-    // 전위: 현재 처리 위치
-    level[depth].push_back(cur->value);
-    traverse(cur->left, depth + 1);
-    // 중위: 현재 처리 위치
-    traverse(cur->right, depth + 1);
-    // 후위: 현재 처리 위치
+void init() { cin >> N; }
+
+void solve(int cnt) {
+    if (cnt == N) {
+        for (int i = 0; i < cnt * 4; i++)
+            cout << '_';
+        cout << "기저 조건\n";
+        return;
+    }
+
+    for (int i = 0; i < cnt * 4; i++)
+        cout << '_';
+    cout << "재귀 호출 전\n";
+
+    solve(cnt + 1);
+
+    for (int i = 0; i < cnt * 4; i++)
+        cout << '_';
+    cout << "재귀 호출 후\n";
 }
 ```
 
-배열로 주어진 완전이진트리의 중위 순회라면 중앙 인덱스가 루트이고 `[l,mid)`, `(mid,r]`를 재귀 호출한다.
+트리 문제에서는 [9934.cpp](./9934.cpp)처럼 `struct Node`, 포인터 `left/right`, 전역 `level`, `fnd(Node *cur, int depth)`를 사용한다. 어떤 경우든 현재 처리를 재귀 앞에 두면 전위, 두 호출 사이면 중위, 뒤에 두면 후위가 된다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -54,4 +68,3 @@ void traverse(Node* cur, int depth) {
 
 - [9934.cpp](./9934.cpp): 중위 입력으로 트리를 만들고 깊이별 전위 방문 결과를 저장
 - [17478.cpp](./17478.cpp): 깊이에 따라 들여쓰기를 누적하고 복귀 시 닫는 문장을 출력
-

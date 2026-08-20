@@ -17,29 +17,34 @@
 - 엄격 증가에는 `lower_bound(tails, x)`, 비감소에는 `upper_bound(tails, x)`를 쓴다.
 - 복원 시 각 원소의 이전 원소 인덱스 `prev[i]`와 길이별 마지막 원소 인덱스 `last[len]`를 저장한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[12015.cpp](./12015.cpp)의 `upper_bound(a-1)` 아이디어를 일반적인 `lower_bound`로 표현하고, [14003.cpp](./14003.cpp)의 복원을 원소 인덱스 기준으로 고정한 형태다.
+스타일 근거: [12015.cpp](./12015.cpp)의 전역 `arr`/`v`, 범위 기반 입력, `v.back()` 비교, `upper_bound(v.begin(), v.end(), a - 1)` 표현과 `init()`/`solve()` 구성을 그대로 축약했다.
 
 ```cpp
-vector<int> tails, last, prev(n, -1);
+vector<int> arr;
+vector<int> v;
+int N;
 
-for (int i = 0; i < n; ++i) {
-    int pos = lower_bound(tails.begin(), tails.end(), a[i]) - tails.begin();
-    if (pos == (int)tails.size()) {
-        tails.push_back(a[i]);
-        last.push_back(i);
-    } else {
-        tails[pos] = a[i];
-        last[pos] = i;
-    }
-    if (pos > 0) prev[i] = last[pos - 1];
+void init() {
+    cin >> N;
+    arr.resize(N);
+    for (auto &a : arr)
+        cin >> a;
 }
 
-vector<int> seq;
-for (int cur = last.back(); cur != -1; cur = prev[cur]) seq.push_back(a[cur]);
-reverse(seq.begin(), seq.end());
+void solve() {
+    for (auto a : arr) {
+        if (v.empty() || v.back() < a)
+            v.push_back(a);
+        else
+            *upper_bound(v.begin(), v.end(), a - 1) = a;
+    }
+    cout << v.size();
+}
 ```
+
+실제 수열 복원이 필요하면 [14003.cpp](./14003.cpp)처럼 위치를 함께 기록하되, 길이별 마지막 인덱스와 각 입력 원소의 이전 인덱스를 서로 다른 배열로 관리해야 한다.
 
 ## 빈 화면 구현 순서
 
@@ -64,4 +69,3 @@ reverse(seq.begin(), seq.end());
 - [14003.cpp](./14003.cpp): 수열 복원을 시도한 구현
 - [2568.cpp](./2568.cpp): 전깃줄 정렬 뒤 LIS 적용
 - [1965.cpp](./1965.cpp): 작은 제한에서 확인하기 좋은 기본형
-

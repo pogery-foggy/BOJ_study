@@ -16,28 +16,40 @@
 - 덱의 맨 앞은 현재 답이다.
 - 방향 시뮬레이션에서는 `rev`가 "논리적 앞"이 실제 `front`인지 `back`인지만 나타낸다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [11003.cpp](11003.cpp)의 전역 배열 `A`, `D`, 전역 `deque<pair<int, int>> maxi`, `init()`에서 첫 원소를 넣고 `solve()`에서 인덱스를 이동하는 구조와 `make_pair` 사용을 보존했다.
 
 ```cpp
-deque<pair<int, int>> dq; // {값, 인덱스}, 값 오름차순
+#define MAX_N 5000000
+using namespace std;
 
-for (int i = 0; i < n; ++i) {
-    while (!dq.empty() && dq.front().second < i - L + 1)
-        dq.pop_front();                  // 창 밖
-    while (!dq.empty() && dq.back().first > a[i])
-        dq.pop_back();                   // 새 값보다 커서 다시 답이 될 수 없음
-    dq.push_back({a[i], i});
-    cout << dq.front().first << ' ';
+int D[MAX_N];
+int A[MAX_N];
+int N, L;
+deque<pair<int, int>> maxi;
+
+void init() {
+    cin >> N >> L;
+    for (int i = 0; i < N; i++)
+        cin >> A[i];
+    maxi.push_back(make_pair(A[0], 0));
+    D[0] = A[0];
+}
+
+void solve() {
+    for (int i = 1; i < N; i++) {
+        if (!maxi.empty() && maxi.front().second < i - L + 1)
+            maxi.pop_front();
+        while (!maxi.empty() && A[i] < maxi.back().first)
+            maxi.pop_back();
+        maxi.push_back(make_pair(A[i], i));
+        D[i] = maxi.front().first;
+    }
 }
 ```
 
-방향만 뒤집는 명령은 다음 두 줄이 핵심이다.
-
-```cpp
-if (cmd == 'R') rev = !rev;
-else if (!rev) dq.pop_front();
-else dq.pop_back();
-```
+이 코드에서 `maxi`라는 이름과 `first=값`, `second=인덱스` 배치는 실제 풀이 그대로다. 최댓값 창이라면 뒤쪽 제거 비교만 반대로 바꾼다.
 
 ## 빈 화면 구현 순서
 

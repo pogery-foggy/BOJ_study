@@ -16,24 +16,37 @@
 - `pair`는 기본적으로 `first`, 같으면 `second` 순으로 정렬된다.
 - 정렬 후 i 이전 구간은 최종 순서가 확정되어 있다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [11651.cpp](./11651.cpp)의 전역 `vector<pair<int,int>> arr`, 람다 대신 이름 있는 `cmp`, `init()`에서 입력과 정렬, `solve()`에서 범위 `for` 출력 구조를 축약했다.
 
 ```cpp
-struct Item { int primary, secondary, id; };
+int N;
+vector<pair<int, int>> arr;
 
-sort(v.begin(), v.end(), [](const Item& a, const Item& b) {
-    if (a.primary != b.primary) return a.primary < b.primary;
-    if (a.secondary != b.secondary) return a.secondary > b.secondary;
-    return a.id < b.id;
-});
+bool cmp(pair<int, int> a, pair<int, int> b) {
+    if (a.second == b.second)
+        return a.first < b.first;
+    return a.second < b.second;
+}
 
-// 두 정렬 배열의 선형 병합이 필요하면
-int i = 0, j = 0;
-while (i < a.size() || j < b.size()) {
-    if (j == b.size() || (i < a.size() && a[i] <= b[j])) out.push_back(a[i++]);
-    else out.push_back(b[j++]);
+void init() {
+    cin >> N;
+    int user_in1, user_in2;
+    for (int i = 0; i < N; i++) {
+        cin >> user_in1 >> user_in2;
+        arr.push_back({user_in1, user_in2});
+    }
+    sort(arr.begin(), arr.end(), cmp);
+}
+
+void solve() {
+    for (auto a : arr)
+        cout << a.first << " " << a.second << "\n";
 }
 ```
+
+단순히 두 정렬 입력을 함께 출력하는 문제에서는 [11728.cpp](./11728.cpp)처럼 하나의 전역 벡터에 모두 넣고 `sort`한 뒤 인덱스 반복문으로 출력하기도 한다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -55,4 +68,3 @@ while (i < a.size() || j < b.size()) {
 - [11651.cpp](./11651.cpp): 좌표의 우선 키를 바꿔 `pair` 기본 정렬 활용
 - [2535.cpp](./2535.cpp): 점수 정렬 뒤 국가별 선발 수를 상태로 제한
 - [11728.cpp](./11728.cpp): 두 배열을 모아 정렬하는 단순하고 확실한 접근
-

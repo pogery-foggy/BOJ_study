@@ -16,26 +16,38 @@
 - 연산자 스택에는 아직 출력하지 않은 연산자만 있고, 현재 연산자보다 우선순위가 높거나 같은 것은 먼저 빠진다.
 - 모노톤 스택은 "무엇을 단조롭게 유지하는지"를 값/인덱스로 명시한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [17298.cpp](17298.cpp)의 전역 `stack<int> st`, 1번부터 쓰는 `arr`·`nge` 고정 배열, `init()` 입력과 오른쪽에서 왼쪽으로 도는 `solve()`를 그대로 축약했다.
 
 ```cpp
-stack<int> st; // 오른쪽 후보 값
-for (int i = n - 1; i >= 0; --i) {
-    while (!st.empty() && st.top() <= a[i]) st.pop();
-    answer[i] = st.empty() ? -1 : st.top();
-    st.push(a[i]);
+using namespace std;
+
+stack<int> st;
+int arr[1000001];
+int nge[1000001];
+int N;
+
+void init() {
+    cin >> N;
+    for (int i = 1; i <= N; i++)
+        cin >> arr[i];
+}
+
+void solve() {
+    for (int i = N; i > 0; i--) {
+        while (!st.empty() && st.top() <= arr[i])
+            st.pop();
+
+        if (st.empty()) nge[i] = -1;
+        else nge[i] = st.top();
+
+        st.push(arr[i]);
+    }
 }
 ```
 
-중위→후위 변환의 연산자 부분:
-
-```cpp
-while (!op.empty() && op.top() != '(' &&
-       priority(op.top()) >= priority(cur)) {
-    out += op.top(); op.pop();
-}
-op.push(cur);
-```
+인덱스 경계가 필요한 문제는 같은 흐름에서 값 대신 인덱스를 `push`한다. 중위→후위 변환은 [1918.cpp](1918.cpp)의 별도 연산자 스택 풀이를 참고한다.
 
 ## 빈 화면 구현 순서
 

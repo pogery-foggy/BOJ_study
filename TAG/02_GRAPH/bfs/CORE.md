@@ -17,29 +17,45 @@
 - 큐에 넣는 순간 방문 처리하면 같은 상태가 중복 삽입되지 않는다.
 - 여러 시작점은 모두 거리 0으로 먼저 큐에 넣는다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[2178.cpp](./2178.cpp)의 격자 BFS를 거리 배열 중심으로 정리한 형태다.
+스타일 근거: [7576.cpp](./7576.cpp)의 전역 `map`/`visited`/방향 배열, `queue<pair<pair<int, int>, int>>`, `valid()`과 `bfs()` 함수 분리, `q.front().first`로 좌표를 꺼내는 방식을 축약했다.
 
 ```cpp
-vector<vector<int>> dist(n, vector<int>(m, -1));
-queue<pair<int, int>> q;
-dist[sy][sx] = 0;
-q.push({sy, sx});
+queue<pair<pair<int, int>, int>> q;
+int map[1001][1001];
+bool visited[1001][1001];
+int dx[] = {0, 0, 1, -1};
+int dy[] = {1, -1, 0, 0};
+int N, M;
 
-while (!q.empty()) {
-    auto [y, x] = q.front(); q.pop();
-    for (int d = 0; d < 4; ++d) {
-        int ny = y + dy[d], nx = x + dx[d];
-        if (ny < 0 || ny >= n || nx < 0 || nx >= m) continue;
-        if (blocked[ny][nx] || dist[ny][nx] != -1) continue;
-        dist[ny][nx] = dist[y][x] + 1;
-        q.push({ny, nx});
+bool valid(int x, int y) {
+    if (x < 0 || x >= N) return false;
+    if (y < 0 || y >= M) return false;
+    return true;
+}
+
+void bfs() {
+    pair<pair<int, int>, int> cur;
+    while (!q.empty()) {
+        cur = q.front();
+        q.pop();
+        int x = cur.first.first;
+        int y = cur.first.second;
+
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if (valid(nx, ny) && map[nx][ny] == 0 && !visited[nx][ny]) {
+                visited[nx][ny] = true;
+                q.push({{nx, ny}, cur.second + 1});
+            }
+        }
     }
 }
 ```
 
-자원이 붙으면 `dist[y][x][broken][parity]`처럼 상태 차원을 늘린다. [16933.cpp](./16933.cpp)은 위치·남은 벽 파괴 수·낮/밤을 함께 큐에 넣는 예다.
+이 골격의 `map[nx][ny] == 0`은 [7576.cpp](./7576.cpp)에서 아직 익지 않은 토마토만 다음 상태로 넣는 문제 전용 조건이다. 일반 격자에서는 그 자리를 문제의 통과 가능 조건으로 바꾼다. 자원이 붙으면 `visited[x][y][broken][parity]`처럼 상태 차원을 늘린다. [16933.cpp](./16933.cpp)은 위치·남은 벽 파괴 수·낮/밤을 함께 큐에 넣는 예다. [2178.cpp](./2178.cpp)의 좌표 디버그 출력은 골격에 복제하지 않았다.
 
 ## 빈 화면 구현 순서
 
@@ -65,4 +81,3 @@ while (!q.empty()) {
 - [7569.cpp](./7569.cpp): 다중 시작점·3차원 확산
 - [16933.cpp](./16933.cpp): 자원과 낮/밤을 포함하는 상태 BFS
 - [16236.cpp](./16236.cpp): BFS 거리와 문제 고유 우선순위 결합
-

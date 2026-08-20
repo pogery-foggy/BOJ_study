@@ -17,28 +17,46 @@
 - 연결 요소 문제는 아직 방문하지 않은 유효 정점마다 DFS를 한 번 시작하고 답을 1 늘린다.
 - 경로 탐색에서는 전역 방문과 현재 경로 방문(`inPath`)을 구분해야 한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[1012.cpp](./1012.cpp)의 격자 연결 요소 구조다.
+스타일 근거: [1012.cpp](./1012.cpp)의 `MAX_N` 고정 배열, `map`/`is_visit`/`dx`/`dy` 전역 변수, `can_move()`와 재귀 `dfs()` 분리, `answer++` 방식의 연결 요소 계산을 보존했다.
 
 ```cpp
-void dfs(int y, int x) {
-    visited[y][x] = true;
-    for (int d = 0; d < 4; ++d) {
-        int ny = y + dy[d], nx = x + dx[d];
-        if (ny < 0 || ny >= n || nx < 0 || nx >= m) continue;
-        if (!cell[ny][nx] || visited[ny][nx]) continue;
-        dfs(ny, nx);
+#define MAX_N 50
+
+int answer, M, N;
+bool map[MAX_N][MAX_N];
+bool is_visit[MAX_N][MAX_N];
+int dx[4] = {1, -1, 0, 0};
+int dy[4] = {0, 0, 1, -1};
+
+bool can_move(int x, int y) {
+    if ((x >= 0 && x < M) && (y >= 0 && y < N))
+        return true;
+    return false;
+}
+
+void dfs(int x, int y) {
+    is_visit[x][y] = true;
+    for (int i = 0; i < 4; i++) {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+        if (can_move(nx, ny))
+            if (map[nx][ny] && !is_visit[nx][ny])
+                dfs(nx, ny);
     }
 }
 
-int components = 0;
-for (int y = 0; y < n; ++y)
-    for (int x = 0; x < m; ++x)
-        if (cell[y][x] && !visited[y][x]) {
-            dfs(y, x);
-            ++components;
+void solve() {
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
+            if (map[i][j] && !is_visit[i][j]) {
+                dfs(i, j);
+                answer++;
+            }
         }
+    }
+}
 ```
 
 ## 빈 화면 구현 순서
@@ -64,4 +82,3 @@ for (int y = 0; y < n; ++y)
 - [13023.cpp](./13023.cpp): 현재 경로 길이가 중요한 DFS
 - [1068.cpp](./1068.cpp): 트리에서 제거 효과를 반영하는 DFS
 - [24479.cpp](./24479.cpp): 인접 정렬과 방문 순서를 결합한 DFS
-

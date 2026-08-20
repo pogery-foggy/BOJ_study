@@ -16,25 +16,47 @@
 - 증가 스택이라면 아래에서 위로 값이 엄격히 증가한다.
 - `L[i]`, `R[i]`는 `a[i]`보다 작은 첫 위치이며 유효 구간은 `(L[i], R[i])`다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1989.cpp](1989.cpp)의 전역 `arr`, `prefix_sum`, `L`, `R`, `vector<int> st`와 왼쪽·오른쪽 경계를 두 번 훑은 뒤 구간합을 계산하는 `solve()` 흐름을 보존했다.
 
 ```cpp
+#define MAX_N 100002
+using namespace std;
+
+int N;
+long long arr[MAX_N];
+long long prefix_sum[MAX_N + 1];
+int L[MAX_N], R[MAX_N];
 vector<int> st;
-for (int i = 1; i <= n; ++i) {
-    while (!st.empty() && a[st.back()] >= a[i]) st.pop_back();
-    L[i] = st.empty() ? 0 : st.back();
-    st.push_back(i);
-}
 
-st.clear();
-for (int i = n; i >= 1; --i) {
-    while (!st.empty() && a[st.back()] >= a[i]) st.pop_back();
-    R[i] = st.empty() ? n + 1 : st.back();
-    st.push_back(i);
-}
+long long solve() {
+    st.reserve(N);
+    st.clear();
+    for (int i = 1; i <= N; i++) {
+        while (!st.empty() && arr[st.back()] >= arr[i])
+            st.pop_back();
+        L[i] = (st.empty() ? 0 : st.back());
+        st.push_back(i);
+    }
 
-long long sum = prefix[R[i] - 1] - prefix[L[i]];
-answer = max(answer, a[i] * sum);
+    st.clear();
+    for (int i = N; i > 0; i--) {
+        while (!st.empty() && arr[st.back()] >= arr[i])
+            st.pop_back();
+        R[i] = (st.empty() ? N + 1 : st.back());
+        st.push_back(i);
+    }
+
+    long long ans = 0;
+    for (int i = 1; i <= N; i++) {
+        int l = L[i] + 1;
+        int r = R[i] - 1;
+        long long s = prefix_sum[r] - prefix_sum[l - 1];
+        ans = max(ans, s * arr[i]);
+    }
+    return ans;
+}
 ```
 
 ## 빈 화면 구현 순서

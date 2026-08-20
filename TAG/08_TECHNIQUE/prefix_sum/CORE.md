@@ -16,23 +16,43 @@
 - 2차원 `ps[y][x]`는 좌상단 `(1,1)`부터 `(y,x)`까지의 합이다.
 - 0행·0열을 0으로 두면 경계 분기가 사라진다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [2167.cpp](./2167.cpp)의 전역 `arr`/`prefix_sum` 2차원 배열, 1-based 반복, `init_arr`/`print_dist` 함수 분리와 `init()` → `solve()` 구조를 축약했다. 비어 있는 `11660.cpp`는 근거로 쓰지 않았다.
 
 ```cpp
-vector<long long> ps(n + 1, 0);
-for (int i = 1; i <= n; ++i) {
-    cin >> a[i];
-    ps[i] = ps[i - 1] + a[i];
-}
-long long rangeSum(int l, int r) { // inclusive
-    return ps[r] - ps[l - 1];
+int arr[301][301];
+int prefix_sum[301][301];
+int N, M;
+
+void init_arr(int s_x, int e_x, int s_y, int e_y) {
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= M; j++) {
+            prefix_sum[i][j] = prefix_sum[i - 1][j]
+                             + prefix_sum[i][j - 1]
+                             - prefix_sum[i - 1][j - 1]
+                             + arr[i][j];
+        }
+    }
 }
 
-// 2차원
-ps[y][x] = a[y][x] + ps[y-1][x] + ps[y][x-1] - ps[y-1][x-1];
-long long rect = ps[y2][x2] - ps[y1-1][x2]
-               - ps[y2][x1-1] + ps[y1-1][x1-1];
+void init() {
+    cin >> N >> M;
+    for (int i = 1; i <= N; i++)
+        for (int j = 1; j <= M; j++)
+            cin >> arr[i][j];
+    init_arr(1, N, 1, M);
+}
+
+int print_dist(int s_x, int s_y, int e_x, int e_y) {
+    return prefix_sum[e_x][e_y] - prefix_sum[e_x][s_y - 1]
+         - prefix_sum[s_x - 1][e_y] + prefix_sum[s_x - 1][s_y - 1];
+}
 ```
+
+1차원 조건 횟수는 [21318.cpp](./21318.cpp)처럼 전역 `prefix_sum[]`에 사건을 먼저 표시한 뒤 다시 누적하고, 질의에서 두 경계의 차를 바로 출력한다. 합의 최대값이 크면 배열형만 `long long`으로 넓힌다.
+
+`init_arr`의 네 경계 인자는 원본에서도 사용하지 않지만, 이 문서에서는 실제 함수 모양과 호출 습관을 기억할 수 있도록 그대로 남겼다. 범용 구간 초기화로 확장하려면 반복문의 시작·끝에 이 인자들을 실제로 연결해야 한다.
 
 ## 5. 빈 화면 구현 순서
 

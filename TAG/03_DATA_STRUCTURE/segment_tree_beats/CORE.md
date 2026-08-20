@@ -17,33 +17,68 @@
 - `mx2 < x < mx1`이면 최대인 원소만 x가 되므로 노드에서 즉시 처리한다.
 - push는 자식의 `mx1`이 부모 `mx1`보다 크지 않도록 동기화한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [17474.cpp](17474.cpp)의 `typedef long long ll`, 전역 `Node tree[]`, `mx1`·`mx2`·`mx_cnt` 명명, `merge_node`/`apply_chmin`/`push`/`update_chmin` 함수 분리와 `node << 1` 표기를 보존했다.
 
 ```cpp
-struct Node { long long sum, mx1, mx2; int cnt; };
+#define MAX_N 1000000
+#define INF -4000000000000000000LL
+typedef long long ll;
 
-void apply_chmin(int node, long long x) {
-    if (tree[node].mx1 <= x) return;
-    tree[node].sum -= (tree[node].mx1 - x) * tree[node].cnt;
+struct Node{
+    ll sum, mx1, mx2;
+    int mx_cnt;
+};
+
+Node tree[MAX_N * 4 + 5];
+
+Node merge_node(Node l, Node r){
+    Node ret;
+    ret.sum = l.sum + r.sum;
+    if(l.mx1 == r.mx1){
+        ret.mx1 = l.mx1;
+        ret.mx2 = max(l.mx2, r.mx2);
+        ret.mx_cnt = l.mx_cnt + r.mx_cnt;
+    }
+    else if(l.mx1 > r.mx1){
+        ret.mx1 = l.mx1;
+        ret.mx2 = max(l.mx2, r.mx1);
+        ret.mx_cnt = l.mx_cnt;
+    }
+    else{
+        ret.mx1 = r.mx1;
+        ret.mx2 = max(l.mx1, r.mx2);
+        ret.mx_cnt = r.mx_cnt;
+    }
+    return ret;
+}
+
+void apply_chmin(int node, ll x){
+    if(tree[node].mx1 <= x) return;
+    tree[node].sum -= (tree[node].mx1 - x) * tree[node].mx_cnt;
     tree[node].mx1 = x;
 }
 
-void push(int node) {
-    apply_chmin(node * 2, tree[node].mx1);
-    apply_chmin(node * 2 + 1, tree[node].mx1);
+void push(int s, int e, int node){
+    if(s == e) return;
+    if(tree[node << 1].mx1 > tree[node].mx1)
+        apply_chmin(node << 1, tree[node].mx1);
+    if(tree[node << 1 | 1].mx1 > tree[node].mx1)
+        apply_chmin(node << 1 | 1, tree[node].mx1);
 }
 
-void chmin(int node, int s, int e, int l, int r, long long x) {
-    if (e < l || r < s || tree[node].mx1 <= x) return;
-    if (l <= s && e <= r && tree[node].mx2 < x) {
+void update_chmin(int s, int e, int node, int l, int r, ll x){
+    if(r < s || e < l || tree[node].mx1 <= x) return;
+    if(l <= s && e <= r && tree[node].mx2 < x){
         apply_chmin(node, x);
         return;
     }
-    push(node);
-    int m = (s + e) / 2;
-    chmin(node*2,s,m,l,r,x);
-    chmin(node*2+1,m+1,e,l,r,x);
-    tree[node] = merge_node(tree[node*2], tree[node*2+1]);
+    push(s, e, node);
+    int mid = (s + e) >> 1;
+    update_chmin(s, mid, node << 1, l, r, x);
+    update_chmin(mid + 1, e, node << 1 | 1, l, r, x);
+    tree[node] = merge_node(tree[node << 1], tree[node << 1 | 1]);
 }
 ```
 

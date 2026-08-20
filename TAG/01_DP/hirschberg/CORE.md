@@ -18,41 +18,69 @@
 - 각 행 계산은 `prev`, `cur` 두 줄만 유지한다.
 - 모든 구간은 현재 코드처럼 반열린 구간 `[begin, end)`으로 통일한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[18438.cpp](./18438.cpp)의 `prefix`/`suffix`와 반열린 구간 방식을 압축한 골격이다.
+스타일 근거: [18438.cpp](./18438.cpp)의 전역 문자열 `A`, `B`, `prefix()`/`suffix()` 함수 분리, 반열린 구간 `[as, ae)`, `n >> 1` 계산과 재귀 문자열 결합 방식을 보존했다.
 
 ```cpp
-vector<int> row(int as, int ae, int bs, int be, bool rev) {
+string A, B;
+
+vector<int> prefix(int as, int ae, int bs, int be) {
     int m = be - bs;
-    vector<int> prev(m + 1), cur(m + 1);
-    for (int x = 0; x < ae - as; ++x) {
+    vector<int> cur(m + 1, 0), prev(m + 1, 0);
+    for (int i = as; i < ae; i++) {
         cur[0] = 0;
-        char ca = rev ? A[ae - 1 - x] : A[as + x];
-        for (int j = 1; j <= m; ++j) {
-            char cb = rev ? B[be - j] : B[bs + j - 1];
-            cur[j] = (ca == cb) ? prev[j - 1] + 1
-                                : max(prev[j], cur[j - 1]);
+        for (int j = 1; j <= m; j++) {
+            if (A[i] == B[bs + j - 1])
+                cur[j] = prev[j - 1] + 1;
+            else
+                cur[j] = max(prev[j], cur[j - 1]);
         }
-        swap(prev, cur);
+        prev = cur;
     }
     return prev;
 }
 
-string solve(int as, int ae, int bs, int be) {
-    if (as == ae || bs == be) return "";
-    if (ae - as == 1) {
-        for (int j = bs; j < be; ++j)
-            if (A[as] == B[j]) return string(1, A[as]);
+vector<int> suffix(int as, int ae, int bs, int be) {
+    int m = be - bs;
+    vector<int> cur(m + 1, 0), prev(m + 1, 0);
+    for (int i = ae - 1; i >= as; i--) {
+        cur[0] = 0;
+        for (int j = 1; j <= m; j++) {
+            if (A[i] == B[be - j])
+                cur[j] = prev[j - 1] + 1;
+            else
+                cur[j] = max(prev[j], cur[j - 1]);
+        }
+        prev = cur;
+    }
+    return prev;
+}
+
+string hirschberg(int as, int ae, int bs, int be) {
+    int n = ae - as;
+    int m = be - bs;
+    if (!n || !m) return "";
+    if (n == 1) {
+        for (int i = bs; i < be; i++) {
+            if (B[i] == A[as]) return string(1, A[as]);
+        }
         return "";
     }
-    int mid = (as + ae) / 2, m = be - bs, cut = 0;
-    auto L = row(as, mid, bs, be, false);
-    auto R = row(mid, ae, bs, be, true);
-    for (int k = 0; k <= m; ++k)
-        if (L[k] + R[m - k] > L[cut] + R[m - cut]) cut = k;
-    return solve(as, mid, bs, bs + cut)
-         + solve(mid, ae, bs + cut, be);
+
+    int amid = as + (n >> 1);
+    vector<int> lk = prefix(as, amid, bs, be);
+    vector<int> rk = suffix(amid, ae, bs, be);
+    int maxi = -1, maxk = 0;
+    for (int k = 0; k <= m; k++) {
+        int value = lk[k] + rk[m - k];
+        if (value > maxi) {
+            maxi = value;
+            maxk = k;
+        }
+    }
+    int bmid = bs + maxk;
+    return hirschberg(as, amid, bs, bmid) + hirschberg(amid, ae, bmid, be);
 }
 ```
 
@@ -78,4 +106,3 @@ string solve(int as, int ae, int bs, int be) {
 - [18438.cpp](./18438.cpp): 전방/후방 롤링 LCS와 재귀 분할이 가장 선명한 구현
 - [17161.cpp](./17161.cpp): 편집 거리로 확장한 Hirschberg
 - [18440.cpp](./18440.cpp): bitset LCS와 결합한 고성능 변형
-

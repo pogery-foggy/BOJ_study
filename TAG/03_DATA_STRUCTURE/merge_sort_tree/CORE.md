@@ -16,31 +16,43 @@
 - 빌드 시 두 자식 벡터를 `merge`하므로 전체 O(N log N)이다.
 - 완전 포함 노드에서는 `upper_bound/lower_bound` 한 번으로 개수를 센다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [13537.cpp](13537.cpp)의 `tree[MAX_N * 4]`와 `arr`, `(s, e, node)` 순서의 재귀 함수, `node << 1` 자식 표기, 노드 벡터를 참조로 받은 뒤 `merge`하는 구성을 유지했다.
 
 ```cpp
-vector<int> tree[4 * MAX_N];
-int a[MAX_N];
+#define MAX_N 100000
+using namespace std;
 
-void build(int node, int s, int e) {
-    if (s == e) { tree[node] = {a[s]}; return; }
-    int m = (s + e) / 2;
-    build(node * 2, s, m);
-    build(node * 2 + 1, m + 1, e);
-    auto &L = tree[node * 2], &R = tree[node * 2 + 1];
-    tree[node].resize(L.size() + R.size());
-    merge(L.begin(), L.end(), R.begin(), R.end(), tree[node].begin());
+vector<int> tree[MAX_N * 4];
+int arr[MAX_N];
+int N;
+
+void init_tree(int s, int e, int node) {
+    if (s == e) {
+        tree[node].push_back(arr[s]);
+        return;
+    }
+
+    int mid = (s + e) >> 1;
+    init_tree(s, mid, node << 1);
+    init_tree(mid + 1, e, node << 1 | 1);
+    auto &l = tree[node << 1];
+    auto &r = tree[node << 1 | 1];
+    tree[node].resize(int(l.size() + r.size()));
+    merge(l.begin(), l.end(), r.begin(), r.end(), tree[node].begin());
 }
 
-int count_greater(int node, int s, int e, int l, int r, int x) {
-    if (e < l || r < s) return 0;
+int query(int s, int e, int l, int r, int x, int node) {
+    if (r < s || e < l)
+        return 0;
     if (l <= s && e <= r) {
-        auto &v = tree[node];
-        return v.end() - upper_bound(v.begin(), v.end(), x);
+        auto &cur = tree[node];
+        return cur.end() - upper_bound(cur.begin(), cur.end(), x);
     }
-    int m = (s + e) / 2;
-    return count_greater(node*2,s,m,l,r,x)
-         + count_greater(node*2+1,m+1,e,l,r,x);
+    int mid = (s + e) >> 1;
+    return query(s, mid, l, r, x, node << 1)
+         + query(mid + 1, e, l, r, x, node << 1 | 1);
 }
 ```
 

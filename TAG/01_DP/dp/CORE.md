@@ -20,27 +20,53 @@
 - 계산 순서: 전이가 참조하는 상태가 반드시 먼저 계산되어 있어야 한다.
 - 복원: 값만으로 이전 상태를 판별하거나 `parent/state_from`을 함께 저장한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-현재 [1149.cpp](./1149.cpp)처럼 마지막 선택을 상태로 두는 바텀업 형태다.
+스타일 근거: [1149.cpp](./1149.cpp)의 전역 `arr`/`dp`/`idx` 배열, 색 두 개를 `pair`로 찾아가는 반복문, 1부터 시작하는 인덱스, `init()`과 `solve()` 분리를 그대로 축약했다.
 
 ```cpp
-const long long INF = (1LL << 60);
-vector<array<long long, 3>> dp(n);
+#include <algorithm>
+#include <iostream>
+#include <utility>
+using namespace std;
 
-for (int c = 0; c < 3; ++c) dp[0][c] = cost[0][c];
+int arr[1001][4];
+int dp[1001][4];
+int N;
+pair<int, int> idx[6] = {
+    {0, 0}, {0, 0}, {0, 0}, {1, 2}, {1, 3}, {2, 3}
+};
 
-for (int i = 1; i < n; ++i) {
-    for (int c = 0; c < 3; ++c) {
-        dp[i][c] = INF;
-        for (int prev = 0; prev < 3; ++prev) {
-            if (prev == c) continue;
-            dp[i][c] = min(dp[i][c], dp[i - 1][prev] + cost[i][c]);
+void init() {
+    cin >> N;
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= 3; j++) {
+            cin >> arr[i][j];
         }
     }
+    dp[1][1] = arr[1][1];
+    dp[1][2] = arr[1][2];
+    dp[1][3] = arr[1][3];
 }
 
-cout << min({dp[n - 1][0], dp[n - 1][1], dp[n - 1][2]});
+void solve() {
+    for (int i = 2; i <= N; i++) {
+        for (int j = 1; j <= 3; j++) {
+            dp[i][j] = min(dp[i - 1][idx[6 - j].first],
+                           dp[i - 1][idx[6 - j].second]);
+            dp[i][j] += arr[i][j];
+        }
+    }
+    cout << min({dp[N][1], dp[N][2], dp[N][3]});
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    init();
+    solve();
+    return 0;
+}
 ```
 
 경로까지 필요하면 [12852.cpp](./12852.cpp)처럼 `dp[next] == dp[cur] - 1`인 전이를 역으로 찾거나, 갱신할 때 `parent[next] = cur`를 기록한다.
@@ -69,4 +95,3 @@ cout << min({dp[n - 1][0], dp[n - 1][1], dp[n - 1][2]});
 - [12852.cpp](./12852.cpp): 최솟값 계산 뒤 조건을 역으로 따라가는 경로 복원
 - [1023.cpp](./1023.cpp): 개수를 세는 DP로 사전순 선택을 결정하는 응용
 - [11062.cpp](./11062.cpp): 구간의 양 끝 선택을 상태로 바꾸는 게임 DP
-

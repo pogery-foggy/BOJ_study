@@ -17,25 +17,37 @@
 - 합집합 길이는 `active`가 0→1이 된 좌표부터 1→0이 된 좌표까지 더한다.
 - 같은 좌표의 시작/끝 처리 순서는 구간 포함 정의에 맞춰 고정한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [2170.cpp](./2170.cpp)의 전역 `pair<int,int> arr[]`, 시작 `+1`/끝 `-1` 이벤트를 인접 칸에 저장, `prv`/`cur` 상태와 인덱스 `for`문을 축약했다. 원본에 없는 구조적 바인딩은 제거했다.
 
 ```cpp
-vector<pair<long long,int>> event;
-for (auto [l, r] : segments) {
-    if (l > r) swap(l, r);
-    event.push_back({l, +1});
-    event.push_back({r, -1});
-}
-sort(event.begin(), event.end());
+pair<int, int> arr[2000000];
+int N, answer, prv, cur;
 
-long long answer = 0, start = 0;
-int active = 0;
-for (auto [x, delta] : event) {
-    if (active == 0) start = x;
-    active += delta;
-    if (active == 0) answer += x - start;
+void init() {
+    cin >> N;
+    for (int i = 0; i < N * 2; i += 2) {
+        cin >> arr[i].first >> arr[i + 1].first;
+        arr[i].second = 1;
+        arr[i + 1].second = -1;
+    }
+    sort(arr, arr + N * 2);
+}
+
+void solve() {
+    for (int i = 0; i < N * 2; i++) {
+        if (cur == 0)
+            prv = arr[i].first;
+        cur += arr[i].second;
+        if (cur == 0)
+            answer += arr[i].first - prv;
+    }
+    cout << answer;
 }
 ```
+
+좌표 차이의 합이 `int`를 넘는 조건이면 `answer`와 `prv`만 `long long`으로 넓힌다. 최대 겹침 수는 [1689.cpp](./1689.cpp)처럼 같은 이벤트 배열에서 `cur`의 최댓값만 갱신한다.
 
 ## 5. 빈 화면 구현 순서
 

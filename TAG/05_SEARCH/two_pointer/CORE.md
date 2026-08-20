@@ -16,24 +16,41 @@
 - 연속합: `sum`은 정확히 현재 반열린 구간 `[left, right)`의 합이다.
 - 매 반복에서 적어도 한 포인터가 전진하므로 전체 O(N)이다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [3273.cpp](./3273.cpp)의 전역 `vector<int> arr`, `back`/`top` 포인터명, `init()`에서 정렬과 경계 설정, `solve()`의 단일 `while` 구조를 축약했다.
 
 ```cpp
-// 양수 배열에서 합이 target인 연속 구간 수
-int left = 0, right = 0, count = 0;
-long long sum = 0;
-while (true) {
-    if (sum >= target) {
-        if (sum == target) ++count;
-        sum -= a[left++];
-    } else {
-        if (right == n) break;
-        sum += a[right++];
+vector<int> arr;
+int x, N, back, top, answer;
+
+void init() {
+    cin >> N;
+    arr.resize(N);
+    for (auto &a : arr)
+        cin >> a;
+    cin >> x;
+    sort(arr.begin(), arr.end());
+    back = 0;
+    top = arr.size() - 1;
+}
+
+void solve() {
+    while (back < top) {
+        if (arr[back] + arr[top] == x) {
+            answer++;
+            top--;
+            back++;
+        } else if (arr[back] + arr[top] > x)
+            top--;
+        else
+            back++;
     }
+    cout << answer;
 }
 ```
 
-정렬된 두 수의 합은 `a[left]+a[right]`가 작으면 `left++`, 크면 `right--`, 같으면 답을 처리하고 둘 다 움직인다.
+연속 부분합에서는 [2003.cpp](./2003.cpp)처럼 `pre`, `suf`, `cur`를 전역으로 둘 수 있다. 다만 원본은 `suf++` 뒤 `arr[suf]`를 더할 때 끝을 넘을 수 있으므로, 다시 구현할 때는 증가 직후 `suf == N` 검사를 먼저 한다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -56,4 +73,3 @@ while (true) {
 - [3273.cpp](./3273.cpp): 정렬 후 양 끝에서 목표 합을 좁히는 기본형
 - [2003.cpp](./2003.cpp): 연속 부분합에 두 경계를 움직이는 형태
 - [13422.cpp](./13422.cpp): 원형 배열을 복제해 고정 길이 창을 미는 형태
-

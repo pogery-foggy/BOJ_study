@@ -17,33 +17,64 @@
 - 연쇄 회전처럼 동시에 변하는 값은 먼저 `next`/`willMove`에 결정하고 나중에 적용한다.
 - 벽과 방문·청소 상태는 서로 다른 의미라면 배열도 분리한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [14503.cpp](./14503.cpp)의 전역 `map`/`is_clean`, 대문자 위치·방향 `R,C,D`, `dx`/`dy`, 주변 상태를 확인하는 `surround`, `while (1)` 안의 문제 조건 순서 그대로인 분기를 축약했다.
 
 ```cpp
-int dy[4] = {-1, 0, 1, 0};
-int dx[4] = {0, 1, 0, -1};
+#define CLEAR 1
+#define WALL 1
 
-while (true) {
-    if (!visited[y][x]) visited[y][x] = true, ++answer;
+int N, M, R, C, D;
+int map[51][51], is_clean[51][51];
+int dx[] = {0, 1, 0, -1};
+int dy[] = {-1, 0, 1, 0};
+int cleaning = 0;
 
-    bool moved = false;
-    for (int turn = 0; turn < 4; ++turn) {
-        dir = (dir + 3) % 4; // 반시계 회전
-        int ny = y + dy[dir], nx = x + dx[dir];
-        if (canMove(ny, nx)) {
-            y = ny; x = nx;
-            moved = true;
-            break;
+bool surround(int y, int x) {
+    bool need_clean = false;
+    for (int i = 0; i < 4; i++) {
+        if (!is_clean[y + dy[i]][x + dx[i]])
+            need_clean = true;
+    }
+    return need_clean;
+}
+
+void solve() {
+    int y = R, x = C;
+    is_clean[y][x] = CLEAR;
+    cleaning++;
+
+    while (1) {
+        if (is_clean[y][x] != CLEAR) {
+            is_clean[y][x] = CLEAR;
+            cleaning++;
+        }
+
+        bool dirty = surround(y, x);
+        if (!dirty) {
+            int back = (D + 2) % 4;
+            int nx = x + dx[back], ny = y + dy[back];
+            if (map[ny][nx] != WALL) {
+                x = nx;
+                y = ny;
+            }
+            else
+                break;
+        } else {
+            D = (D + 3) % 4;
+            int nx = x + dx[D], ny = y + dy[D];
+            if (is_clean[ny][nx] != CLEAR) {
+                x = nx;
+                y = ny;
+            }
         }
     }
-    if (moved) continue;
-
-    int back = (dir + 2) % 4;
-    int ny = y + dy[back], nx = x + dx[back];
-    if (wall[ny][nx]) break;
-    y = ny; x = nx;
+    cout << cleaning;
 }
 ```
+
+`init()`에서 원본처럼 벽을 `is_clean=CLEAR`로 함께 표시해야 `surround`가 벽을 청소 후보로 세지 않는다. [14891.cpp](./14891.cpp)의 톱니 상태·재귀 전파 방식은 참고할 수 있지만, 그 파일에 남은 톱니 비트 출력·`cur/dir`·구분선 디버그 출력은 골격에 복제하지 않았다.
 
 ## 5. 빈 화면 구현 순서
 

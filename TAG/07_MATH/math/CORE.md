@@ -16,22 +16,29 @@
 - 마지막 날에는 내려가지 않는 식처럼 반복 한 묶음과 종료 단계를 분리한다.
 - 정수 올림 나눗셈은 양수에서 `(x+d-1)/d`로 표현한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [2869.cpp](./2869.cpp)의 지역 `A, B, V`, 몫을 `last`에 먼저 계산한 뒤 나머지 유무로 바로 출력하는 단일 `main()` 구조를 축약했다. 비어 있는 `16199.cpp`는 근거로 쓰지 않았다.
 
 ```cpp
-long long ceilDiv(long long x, long long d) {
-    return (x + d - 1) / d; // x>=0, d>0
-}
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
 
-// 매일 up, 밤에 down, 목표 height: 마지막 날의 up을 먼저 제외
-long long days = ceilDiv(height - up, up - down) + 1;
+    int A, B, V;
+    cin >> A >> B >> V;
 
-// 주기 문제
-int state = initial;
-for (long long i = 0; i < count % period; ++i) {
-    state = nextState(state);
+    int last = (V - A) / (A - B);
+    if (!((V - A) % (A - B)))
+        cout << last + 1;
+    else
+        cout << last + 2;
+    return 0;
 }
 ```
+
+여러 테스트케이스의 주기 계산은 [1009.cpp](./1009.cpp)처럼 전역 입력과 `init()`/`solve()`를 두고, `main()`의 `for (int testcase = 0; testcase < T; testcase++)`에서 반복한다.
 
 ## 5. 빈 화면 구현 순서
 

@@ -16,29 +16,43 @@
 - 각 반복이 끝날 때 `result[0..i]`는 확정된 낮은 자리이고 `carry`만 다음 자리로 넘어간다.
 - 내부 표현은 뒤집힌 문자열로 유지하고 출력할 때만 역순으로 읽는다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [15353.cpp](./15353.cpp)의 전역 `string A, B`, 입력 직후 `reverse`, 값으로 문자열을 받는 `sum`, `ret +=`로 낮은 자리부터 쌓고 역순 출력하는 구조를 거의 그대로 축약했다.
 
 ```cpp
-// a, b는 낮은 자리부터 저장된 문자열
-string addReversed(const string& a, const string& b) {
-    string result;
-    int carry = 0;
-    int n = max(a.size(), b.size());
-    for (int i = 0; i < n || carry; ++i) {
-        int sum = carry;
-        if (i < (int)a.size()) sum += a[i] - '0';
-        if (i < (int)b.size()) sum += b[i] - '0';
-        result.push_back(char('0' + sum % 10));
-        carry = sum / 10;
-    }
-    return result;
+string A, B;
+
+void init() {
+    cin >> A >> B;
+    reverse(A.begin(), A.end());
+    reverse(B.begin(), B.end());
 }
 
-reverse(a.begin(), a.end());
-reverse(b.begin(), b.end());
-string result = addReversed(a, b);
-for (auto it = result.rbegin(); it != result.rend(); ++it) cout << *it;
+string sum(string num1, string num2) {
+    string ret = "";
+    int size = max(num1.size(), num2.size());
+    int total = 0;
+
+    for (int i = 0; i < size || total; i++) {
+        if (num1.size() > i)
+            total += num1[i] - '0';
+        if (num2.size() > i)
+            total += num2[i] - '0';
+        ret += total % 10 + '0';
+        total /= 10;
+    }
+    return ret;
+}
+
+void solve() {
+    string answer = sum(A, B);
+    for (int i = answer.size() - 1; i >= 0; i--)
+        cout << answer[i];
+}
 ```
+
+이 스타일에서는 큰 수 문자열을 계속 뒤집힌 상태로 저장한다. [10826.cpp](./10826.cpp)의 `dp[]`도 같은 `sum` 반환값을 그대로 저장한 뒤 출력할 때만 뒤에서 앞으로 읽는다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -61,4 +75,3 @@ for (auto it = result.rbegin(); it != result.rend(); ++it) cout << *it;
 - [15353.cpp](./15353.cpp): 두 큰 정수를 뒤집어 자리별로 더하는 최소 형태
 - [10826.cpp](./10826.cpp): 같은 덧셈을 피보나치 DP에 연결
 - [2407.cpp](./2407.cpp): 파스칼 점화식과 문자열 덧셈을 결합한 큰 조합
-

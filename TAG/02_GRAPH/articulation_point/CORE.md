@@ -16,31 +16,38 @@
 - 루트가 아니면 자식 `v`에 대해 `low[v] >= order[u]`일 때 `u`가 단절점이다.
 - DFS 루트는 독립적인 DFS 자식이 2개 이상일 때만 단절점이다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[11266.cpp](./11266.cpp)의 `visited`/`up_limit` 흐름을 이름만 명확히 한 형태다.
+스타일 근거: [11266.cpp](./11266.cpp)의 전역 `edge`/`visited`/`up_limit`/`is_cut` 배열, `cur`/`nxt` 명명, 자식의 반환값을 `ret`에 받는 재귀 `dfs()` 구조를 그대로 축약했다.
 
 ```cpp
-int timer;
-vector<int> order(n + 1), low(n + 1);
-vector<bool> cut(n + 1);
+#define MAX_N 100001
 
-void dfs(int u, int parent) {
-    order[u] = low[u] = ++timer;
-    int childCount = 0;
+vector<int> edge[MAX_N];
+int visited[MAX_N];
+int up_limit[MAX_N];
+bool is_cut[MAX_N];
+int depth;
 
-    for (int v : graph[u]) {
-        if (v == parent) continue;
-        if (!order[v]) {
-            ++childCount;
-            dfs(v, u);
-            low[u] = min(low[u], low[v]);
-            if (parent != 0 && low[v] >= order[u]) cut[u] = true;
+int dfs(int cur, int parent) {
+    visited[cur] = up_limit[cur] = ++depth;
+    int child = 0;
+
+    for (int nxt : edge[cur]) {
+        if (nxt == parent) continue;
+        if (visited[nxt] == 0) {
+            child++;
+            int ret = dfs(nxt, cur);
+            up_limit[cur] = min(up_limit[cur], ret);
+            if (parent != 0 && ret >= visited[cur])
+                is_cut[cur] = true;
         } else {
-            low[u] = min(low[u], order[v]);
+            up_limit[cur] = min(up_limit[cur], visited[nxt]);
         }
     }
-    if (parent == 0 && childCount >= 2) cut[u] = true;
+    if (parent == 0 && child >= 2)
+        is_cut[cur] = true;
+    return up_limit[cur];
 }
 ```
 
@@ -64,4 +71,3 @@ void dfs(int u, int parent) {
 ## 대표 로컬 풀이
 
 - [11266.cpp](./11266.cpp): `visited`와 `up_limit`으로 low-link를 직접 드러낸 현재 폴더의 구현
-

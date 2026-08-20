@@ -17,33 +17,37 @@
 - 최적 병합에서는 가장 작은 두 묶음을 먼저 합쳐도 최적해가 존재한다.
 - 식 최소화에서는 첫 `-` 이후의 모든 수를 빼는 것이 가능한 괄호 배치와 같다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1931.cpp](./1931.cpp)의 전역 `room`, 입력할 때 `{끝, 시작}`으로 뒤집어 담아 기본 `sort`를 활용하고, `time`/`cnt`를 둔 인덱스 반복문으로 선택하는 구조를 축약했다. 원본에 없는 람다와 구조적 바인딩은 제거했다.
 
 ```cpp
-// 종료 시간이 빠른 활동부터 선택
-sort(job.begin(), job.end(), [](auto a, auto b) {
-    if (a.second != b.second) return a.second < b.second;
-    return a.first < b.first;
-});
+int N, s, e;
+vector<pair<int, int>> room;
 
-int count = 0, lastEnd = INT_MIN;
-for (auto [start, end] : job) {
-    if (start >= lastEnd) {
-        ++count;
-        lastEnd = end;
+void init() {
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        cin >> s >> e;
+        room.push_back({e, s});
     }
+    sort(room.begin(), room.end());
 }
 
-// 최적 병합
-priority_queue<long long, vector<long long>, greater<long long>> pq;
-long long cost = 0;
-while (pq.size() > 1) {
-    long long x = pq.top(); pq.pop();
-    long long y = pq.top(); pq.pop();
-    cost += x + y;
-    pq.push(x + y);
+void solve() {
+    int time = room[0].first;
+    int cnt = 1;
+    for (int i = 1; i < N; i++) {
+        if (time <= room[i].second) {
+            cnt++;
+            time = room[i].first;
+        }
+    }
+    cout << cnt;
 }
 ```
+
+최소 두 묶음 병합 문제에서는 [1715.cpp](./1715.cpp)처럼 전역 `priority_queue<int, vector<int>, greater<int>> pq`를 두고 `a`, `b`를 차례로 꺼내 `cnt += a + b` 후 다시 넣는다. 합이 큰 조건이면 `pq`와 `cnt`를 함께 `long long`으로 바꾼다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -66,4 +70,3 @@ while (pq.size() > 1) {
 - [1931.cpp](./1931.cpp): 종료 시각이 빠른 회의를 확정해 남은 시간을 최대화
 - [1715.cpp](./1715.cpp): 최소 힙에서 가장 작은 두 묶음을 반복 병합
 - [1541.cpp](./1541.cpp): 첫 마이너스 이후를 모두 빼도록 식을 한 번 순회
-

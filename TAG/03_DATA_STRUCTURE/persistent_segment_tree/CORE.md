@@ -16,41 +16,79 @@
 - update는 기존 노드를 바꾸지 않고 방문한 노드만 복제해 새 루트를 반환한다.
 - 방문하지 않은 반대쪽 자식 인덱스는 이전 버전과 공유한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [16978.cpp](16978.cpp)의 `typedef long long ll`, 인덱스로 자식을 저장하는 `Node`, 전역 노드 풀과 `node_cnt`, 새 루트를 반환하는 재귀 `update(s, e, node, idx, v)` 구성을 그대로 축약했다.
 
 ```cpp
-struct Node { int l = 0, r = 0; long long sum = 0; };
-Node tr[MAX_NODE];
-int roots[MAX_Q], nodes = 0;
+#define MAX_N 100001
+#define MAX_M 100001
+#define MAX_NODE 2200000
+typedef long long ll;
 
-int clone_node(int from) {
-    tr[++nodes] = tr[from];
-    return nodes;
+struct Node{
+    int l, r;
+    ll val;
+    Node(): l(-1), r(-1), val(0){}
+};
+
+Node tree[MAX_NODE];
+int node_cnt, root_cnt;
+int root[MAX_M + 1];
+ll arr[MAX_N];
+
+int new_node(int l, int r, ll val){
+    int node = node_cnt++;
+    tree[node].l = l;
+    tree[node].r = r;
+    tree[node].val = val;
+    return node;
 }
 
-int update(int prev, int s, int e, int idx, long long value) {
-    int cur = clone_node(prev);
-    if (s == e) { tr[cur].sum = value; return cur; }
-    int m = (s + e) / 2;
-    if (idx <= m) tr[cur].l = update(tr[prev].l, s, m, idx, value);
-    else tr[cur].r = update(tr[prev].r, m + 1, e, idx, value);
-    tr[cur].sum = tr[tr[cur].l].sum + tr[tr[cur].r].sum;
-    return cur;
+int init_tree(int s, int e){
+    if(s == e)
+        return new_node(-1, -1, arr[s]);
+    int mid = (s + e) >> 1;
+    int l = init_tree(s, mid);
+    int r = init_tree(mid + 1, e);
+    return new_node(l, r, tree[l].val + tree[r].val);
 }
 
-long long query(int cur, int s, int e, int l, int r) {
-    if (e < l || r < s) return 0;
-    if (l <= s && e <= r) return tr[cur].sum;
-    int m = (s + e) / 2;
-    return query(tr[cur].l,s,m,l,r) + query(tr[cur].r,m+1,e,l,r);
+int update(int s, int e, int node, int idx, ll v){
+    int next = new_node(tree[node].l, tree[node].r, tree[node].val);
+
+    if(s == e){
+        tree[next].val = v;
+        return next;
+    }
+    int mid = (s + e) >> 1;
+    if(idx <= mid)
+        tree[next].l = update(s, mid, tree[node].l, idx, v);
+    else
+        tree[next].r = update(mid + 1, e, tree[node].r, idx, v);
+
+    int L = tree[next].l;
+    int R = tree[next].r;
+    tree[next].val = tree[L].val + tree[R].val;
+    return next;
+}
+
+ll query(int s, int e, int l, int r, int node){
+    if(r < s || e < l) return 0;
+    if(l <= s && e <= r) return tree[node].val;
+    int mid = (s + e) >> 1;
+    return query(s, mid, l, r, tree[node].l)
+         + query(mid + 1, e, l, r, tree[node].r);
 }
 ```
+
+새 버전은 실제 코드처럼 `root[root_cnt] = update(..., root[root_cnt-1], ...)`로 받고 `root_cnt`를 증가시킨다.
 
 ## 빈 화면 구현 순서
 
 1. 노드 풀 크기를 `초기 노드 + 갱신 수 × (logN + 여유)`로 계산한다.
 2. 초기 트리와 `root[0]`을 만든다.
-3. 이전 노드를 복사하는 `clone_node`를 만든다.
+3. 실제 코드처럼 이전 노드의 두 자식과 값을 복사하는 `new_node` 호출을 update 첫 줄에 둔다.
 4. update가 새 노드 번호를 반환하도록 쓴다.
 5. 버전별 루트를 저장하고 질의에 원하는 루트를 넘긴다.
 

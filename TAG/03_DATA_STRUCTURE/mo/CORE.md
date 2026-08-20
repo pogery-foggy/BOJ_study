@@ -16,27 +16,109 @@
 - 질의는 `L / block` 우선, 그다음 `R` 순으로 정렬한다.
 - `add/remove`는 정확히 서로 역연산이어야 하며 답은 원래 질의 인덱스에 저장한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [13546.cpp](13546.cpp)의 전역 `sqrtN`, 멤버가 `idx, s, e`인 `Query`, 구조체 내부 `operator <`, 네 방향을 별도 함수로 나눈 포인터 이동을 그대로 축약했다. 비어 있는 `21064.cpp`는 근거로 사용하지 않았다.
 
 ```cpp
-struct Query { int l, r, id; };
-int B;
+#define MAX_N 100001
+#define MAX_K 100001
+#define MAX_B 400
 
-sort(q.begin(), q.end(), [&](const Query& a, const Query& b) {
-    int ab = a.l / B, bb = b.l / B;
-    if (ab != bb) return ab < bb;
-    return (ab & 1) ? a.r > b.r : a.r < b.r;
-});
+int sqrtN;
+int bucket_cnt[MAX_B];
+int dist_cnt[MAX_N];
+int answer[MAX_N];
 
-int L = 0, R = -1;
-for (auto [ql, qr, id] : q) {
-    while (L > ql) add(--L);
-    while (R < qr) add(++R);
-    while (L < ql) remove(L++);
-    while (R > qr) remove(R--);
-    answer[id] = current_answer();
+struct Query{
+    int idx, s, e;
+    bool operator <(const Query &x) const {
+        if (s/sqrtN != x.s/sqrtN)
+            return s/sqrtN < x.s/sqrtN;
+        return e < x.e;
+    }
+};
+
+int N, K, Q;
+vector<Query> query;
+vector<int> v;
+deque<int> pos[MAX_K];
+
+int get_answer(){
+    for(int b = N / sqrtN; b >= 0; b--){
+        if(bucket_cnt[b] == 0) continue;
+        int s = min(N, (b + 1) * sqrtN - 1);
+        int e = b * sqrtN;
+        for(int i = s; i >= e; i--){
+            if(dist_cnt[i] > 0) return i;
+        }
+    }
+    return 0;
+}
+
+void erase_dist(int d){
+    dist_cnt[d]--;
+    if(dist_cnt[d] == 0)
+        bucket_cnt[d / sqrtN]--;
+}
+
+void add_dist(int d){
+    if(dist_cnt[d] == 0)
+        bucket_cnt[d / sqrtN]++;
+    dist_cnt[d]++;
+}
+
+int now(int x){
+    if(pos[x].empty()) return 0;
+    return pos[x].back() - pos[x].front();
+}
+
+void add_left(int idx){
+    int x = v[idx];
+    erase_dist(now(x));
+    pos[x].push_front(idx);
+    add_dist(now(x));
+}
+
+void add_right(int idx){
+    int x = v[idx];
+    erase_dist(now(x));
+    pos[x].push_back(idx);
+    add_dist(now(x));
+}
+
+void remove_left(int idx){
+    int x = v[idx];
+    erase_dist(now(x));
+    pos[x].pop_front();
+    add_dist(now(x));
+}
+
+void remove_right(int idx){
+    int x = v[idx];
+    erase_dist(now(x));
+    pos[x].pop_back();
+    add_dist(now(x));
+}
+
+void solve(){
+    int s = 0, e = -1;
+
+    for(int i = 0; i < Q; i++){
+        int qs = query[i].s;
+        int qe = query[i].e;
+
+        while(e < qe) add_right(++e);
+        while(e > qe) remove_right(e--);
+        while(s < qs) remove_left(s++);
+        while(s > qs) add_left(--s);
+
+        answer[query[i].idx] = get_answer();
+    }
 }
 ```
+
+`add/remove`를 빈 교과서형 자리표시자로 두지 않고, 실제 풀이의 값별 위치 덱과 거리 버킷 갱신을 그대로 남겼다. 다른 문제에서는 네 함수의 내부 상태만 문제에 맞게 바꾸고 바깥의 네 `while`문은 유지한다.
 
 ## 빈 화면 구현 순서
 

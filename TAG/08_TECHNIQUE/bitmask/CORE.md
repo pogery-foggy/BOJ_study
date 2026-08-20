@@ -16,23 +16,42 @@
 - x가 포함됨은 `(mask & (1ULL<<x)) != 0`과 같다.
 - 부모 인덱스는 `x>>1`; 비트를 하나 버릴 때마다 한 층 위로 간다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [11723.cpp](./11723.cpp)의 전역 `cmd, s, x, N`, 명령마다 입력을 이어 받는 `solve()`, `if`/`else if` 분기와 직접 쓴 비트 연산을 축약했다. 원본에 없는 람다와 `uint64_t` 헬퍼는 넣지 않았다.
 
 ```cpp
-uint64_t mask = 0;
-auto bit = [](int x) { return 1ULL << x; };
+string cmd;
+int s, x, N = 20;
 
-mask |= bit(x);        // add
-mask &= ~bit(x);       // remove
-bool has = mask & bit(x);
-mask ^= bit(x);        // toggle
-mask = (1ULL << n) - 1; // all, 단 n<64
-mask = 0;              // empty
+void init() { cin >> cmd; }
 
-for (uint64_t sub = mask; sub; sub = (sub - 1) & mask) {
-    // mask의 0이 아닌 모든 부분집합
+void solve() {
+    if (cmd == "add") {
+        cin >> x;
+        x--;
+        s = (s | (1 << x));
+    } else if (cmd == "remove") {
+        cin >> x;
+        x--;
+        s = (s & ~(1 << x));
+    } else if (cmd == "check") {
+        cin >> x;
+        x--;
+        int check = (s & (1 << x));
+        cout << (check ? 1 : 0) << '\n';
+    } else if (cmd == "toggle") {
+        cin >> x;
+        x--;
+        s = (s ^ (1 << x));
+    } else if (cmd == "all")
+        s = (1 << N) - 1;
+    else
+        s = 0;
 }
 ```
+
+`main()`에서는 원본처럼 `T`를 읽고 `for (int testcase = 0; testcase < T; testcase++)`마다 `init(); solve();`를 호출한다. 31번 이상 비트를 쓸 때만 `1LL << x`와 `long long`으로 함께 넓힌다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -54,4 +73,3 @@ for (uint64_t sub = mask; sub; sub = (sub - 1) & mask) {
 - [11723.cpp](./11723.cpp): 작은 집합의 여섯 연산을 비트 하나로 구현
 - [20364.cpp](./20364.cpp): `x >>= 1`로 루트까지 올라가며 점유 조상을 찾는 이진 표현 응용
 - [1052.cpp](./1052.cpp): 켜진 비트 수와 자리올림을 이용한 묶음 합치기
-

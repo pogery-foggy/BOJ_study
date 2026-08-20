@@ -16,22 +16,32 @@
 - `exp`의 현재 최하위 비트가 1이면 현재 `base`를 답에 반영한다.
 - 매 단계 `base=base*base`, `exp>>=1`; 모듈러는 곱셈 직후 적용한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1629.cpp](./1629.cpp)의 전역 `A, B, C`, `fnd(int b)` 재귀, 절반 결과를 지역 `ret`에 한 번만 저장하고 홀짝으로 반환하는 구조를 축약했다.
 
 ```cpp
-long long power(long long base, long long exp, long long mod) {
-    long long answer = 1 % mod;
-    base %= mod;
-    while (exp > 0) {
-        if (exp & 1LL) answer = answer * base % mod;
-        base = base * base % mod;
-        exp >>= 1;
-    }
-    return answer;
+int A, B, C;
+
+void init() { cin >> A >> B >> C; }
+
+long long int fnd(int b) {
+    if (b == 0)
+        return 1 % C;
+    if (b == 1)
+        return A % C;
+
+    long long int ret = fnd(b / 2) % C;
+    if (b % 2)
+        return ret % C * ret % C * A % C;
+    else
+        return ret % C * ret % C;
 }
+
+void solve() { cout << fnd(B); }
 ```
 
-행렬도 동일하다. `answer`를 단위행렬로 두고 스칼라 곱셈 대신 `mul(answer, base)`, `mul(base, base)`를 호출한다.
+원본은 문제 조건상 `B >= 1`이라 `b == 1`만 있었지만, 다시 쓰는 골격에는 안전하게 `b == 0`도 넣었다. 행렬 거듭제곱은 [10830.cpp](../../09_PARADIGM/divide_and_conquer/10830.cpp)처럼 전역 `answer`, `cur` 배열과 `mul(a,b)`를 두고 `B >>= 1` 반복문을 쓴다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -54,4 +64,3 @@ long long power(long long base, long long exp, long long mod) {
 - [1629.cpp](./1629.cpp): 지수를 반으로 나누고 홀수일 때 A를 한 번 더 곱하는 재귀형
 - [2749.cpp](./2749.cpp): 큰 피보나치 항을 빠르게 줄이는 응용
 - 행렬 반복형은 [../../09_PARADIGM/divide_and_conquer/10830.cpp](../../09_PARADIGM/divide_and_conquer/10830.cpp)에서 확인
-

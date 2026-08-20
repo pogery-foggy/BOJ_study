@@ -16,28 +16,36 @@
 - `lcm(a,b) = a/gcd(a,b)*b`; 먼저 나눠 overflow 위험을 줄인다.
 - 구간 체에서 배수 `p`의 첫 위치는 `ceil(L/p)*p = ((L+p-1)/p)*p`다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [13241.cpp](./13241.cpp)의 전역 `a, b`, 재귀 `gcd`, `init()`에서 두 수의 순서를 맞추고 `solve()`에서 최소공배수를 출력하는 구조를 축약했다.
 
 ```cpp
-long long gcd(long long a, long long b) {
-    while (b) {
-        long long r = a % b;
+long long a, b;
+
+long long gcd(long long x, long long y) {
+    if (!(x % y))
+        return y;
+    else
+        return gcd(y, x % y);
+}
+
+void init() {
+    cin >> a >> b;
+    if (a < b) {
+        long long temp = a;
         a = b;
-        b = r;
+        b = temp;
     }
-    return a;
 }
 
-long long lcm(long long a, long long b) {
-    return a / gcd(a, b) * b;
+void solve() {
+    long long g = gcd(a, b);
+    cout << a / g * b;
 }
-
-// [L,R]에서 어떤 p의 배수 표시
-long long first = (L + p - 1) / p * p;
-for (long long x = first; x <= R; x += p) marked[x - L] = true;
 ```
 
-제곱 ㄴㄴ 수에서는 `p=i*i`를 두고 `i<=sqrt(R)`까지만 같은 구간 체를 수행한다.
+원본의 `gcd(int,int)`는 큰 입력에서 좁아질 수 있어 골격에서는 사용자 코드의 전역 자료형에 맞춰 `long long`으로 고쳤고, 곱셈 overflow 위험을 줄이려고 먼저 `gcd`로 나눈다. 구간 체는 [1016.cpp](./1016.cpp)의 `typedef long long ll`, 전역 `prime[]`, `cur=i*i`, `s=((mini+cur-1)/cur)*cur` 형태를 따른다.
 
 ## 5. 빈 화면 구현 순서
 

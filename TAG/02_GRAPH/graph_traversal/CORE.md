@@ -17,22 +17,36 @@
 - 목표에 닿으면 성공, 방문한 정점에 다시 닿으면 이후도 반복되므로 실패다.
 - 테스트케이스마다 방문 배열을 초기화한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[11558.cpp](./11558.cpp)의 배열 기반 순회를 그대로 일반화했다.
+스타일 근거: [11558.cpp](./11558.cpp)의 전역 `is_visit`/`arr` 배열, `cnt`/`cur` 변수명, `init()`에서 테스트케이스 상태를 초기화하고 `solve()`에서 `while`로 다음 정점을 따라가는 구조를 보존했다.
 
 ```cpp
-vector<char> visited(n + 1, false);
-int cur = start;
-int steps = 0;
+bool is_visit[10001];
+int arr[10001];
+int N;
 
-while (cur != target && !visited[cur]) {
-    visited[cur] = true;
-    cur = nextNode[cur];
-    ++steps;
+void init() {
+    cin >> N;
+    for (int i = 1; i <= N; i++) {
+        is_visit[i] = false;
+        cin >> arr[i];
+    }
 }
 
-cout << (cur == target ? steps : 0);
+void solve() {
+    int cnt = 0;
+    int cur = 1;
+    while (!is_visit[cur] && cur != N) {
+        is_visit[cur] = true;
+        cnt++;
+        cur = arr[cur];
+    }
+    if (cur == N)
+        cout << cnt << "\n";
+    else
+        cout << "0\n";
+}
 ```
 
 ## 빈 화면 구현 순서

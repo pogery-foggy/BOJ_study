@@ -17,24 +17,39 @@
 - 자식 영역은 부모를 빠짐없이 덮고 서로 겹치지 않는다.
 - 반환값은 부모가 결합할 수 있는 완결된 형태다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1992.cpp](./1992.cpp)의 전역 `map[64][64]`, 네 경계를 받는 `divide`, `>> 1`로 중간점을 만들고 네 재귀 결과를 `value1`~`value4`에 저장하는 구조를 축약했다.
 
 ```cpp
-string divide(int y, int x, int size) {
-    if (size == 1) return string(1, board[y][x]);
+int map[64][64], N;
 
-    int h = size / 2;
-    string a = divide(y,     x,     h);
-    string b = divide(y,     x + h, h);
-    string c = divide(y + h, x,     h);
-    string d = divide(y + h, x + h, h);
+string divide(int x_s, int x_e, int y_s, int y_e) {
+    if (x_s == x_e)
+        return to_string(map[x_s][y_s]);
 
-    if (a.size() == 1 && a == b && b == c && c == d) return a;
-    return "(" + a + b + c + d + ")";
+    int x_mid = (x_s + x_e) >> 1;
+    int y_mid = (y_s + y_e) >> 1;
+    string value1 = divide(x_s, x_mid, y_s, y_mid);
+    string value2 = divide(x_mid + 1, x_e, y_s, y_mid);
+    string value3 = divide(x_s, x_mid, y_mid + 1, y_e);
+    string value4 = divide(x_mid + 1, x_e, y_mid + 1, y_e);
+
+    if (value1 == value2 && value3 == value4 && value1 == value3) {
+        if (value1.size() == 1 && value2.size() == 1
+            && value3.size() == 1 && value4.size() == 1)
+            return value1;
+        else
+            return "(" + value1 + value2 + value3 + value4 + ")";
+    }
+    else
+        return "(" + value1 + value2 + value3 + value4 + ")";
 }
+
+void solve() { cout << divide(0, N - 1, 0, N - 1); }
 ```
 
-지수 분할은 영역 대신 `exp`를 절반으로 나누고, 같은 절반 결과를 한 번만 계산해 제곱한다.
+네 결과가 같아도 이미 괄호로 묶인 문자열이면 한 글자로 압축하지 않는 원본의 중첩 조건과 `value1`~`value4` 변수명을 그대로 두었다. 지수 분할은 [10830.cpp](./10830.cpp)처럼 `typedef long long ll`, 전역 배열, `mul()`과 `B >>= 1`을 사용한다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -57,4 +72,3 @@ string divide(int y, int x, int size) {
 - [1992.cpp](./1992.cpp): 네 사분면을 재귀적으로 압축하고 결과 문자열을 결합
 - [2630.cpp](./2630.cpp): 영역이 같은 색인지 판단한 뒤 사분할하는 기본형
 - [10830.cpp](./10830.cpp): 지수 비트를 절반씩 줄이는 행렬 거듭제곱
-

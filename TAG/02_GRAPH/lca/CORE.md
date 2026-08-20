@@ -16,35 +16,59 @@
 - 깊이를 맞춘 뒤에는 두 정점이 LCA까지 올라가야 할 간선 수가 같다.
 - 한 칸 방식은 `O(높이)`, binary lifting은 전처리 `O(N log N)`·질의 `O(log N)`이다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[11437.cpp](./11437.cpp)과 [3584.cpp](./3584.cpp)에서 사용한 단순 부모 상승 방식이다.
+스타일 근거: [11437.cpp](./11437.cpp)의 전역 `p`/`depth`/`edges`, 재귀 `dfs()`로 깊이와 부모를 동시에 만드는 방식, 임시 변수로 두 정점을 바꾸고 한 칸씩 올리는 `solve()` 흐름을 보존했다.
 
 ```cpp
-void build(int root) {
-    queue<int> q;
-    fill(depth.begin(), depth.end(), -1);
-    depth[root] = 0;
-    q.push(root);
-    while (!q.empty()) {
-        int u = q.front(); q.pop();
-        for (int v : tree[u]) if (depth[v] == -1) {
-            depth[v] = depth[u] + 1;
-            parent[v] = u;
-            q.push(v);
-        }
+#define MAX_N 50001
+
+int p[MAX_N], depth[MAX_N], N;
+vector<int> edges[MAX_N];
+
+void dfs(int cur) {
+    for (auto next : edges[cur]) {
+        if (depth[next] != -1)
+            continue;
+        depth[next] = depth[cur] + 1;
+        p[next] = cur;
+        dfs(next);
     }
 }
 
-int lca(int a, int b) {
-    if (depth[a] < depth[b]) swap(a, b);
-    while (depth[a] > depth[b]) a = parent[a];
-    while (a != b) a = parent[a], b = parent[b];
-    return a;
+void init() {
+    cin >> N;
+    for (int i = 1; i <= N; i++)
+        depth[i] = -1;
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        edges[u].push_back(v);
+        edges[v].push_back(u);
+    }
+    depth[1] = 0;
+    dfs(1);
+}
+
+void solve() {
+    int a, b;
+    cin >> a >> b;
+    if (depth[a] < depth[b]) {
+        int temp = a;
+        a = b;
+        b = temp;
+    }
+    while (depth[a] != depth[b])
+        a = p[a];
+    while (a != b) {
+        a = p[a];
+        b = p[b];
+    }
+    cout << a << "\n";
 }
 ```
 
-질의가 많다면 `up[k][v] = up[k-1][ up[k-1][v] ]`를 만든 뒤 깊이 차와 두 정점을 큰 비트부터 올린다.
+이 골격은 실제 풀이와 같은 한 칸 상승 방식이다. 질의가 많다면 `up[k][v] = up[k-1][up[k-1][v]]`를 만든 뒤 깊이 차와 두 정점을 큰 비트부터 올린다.
 
 ## 빈 화면 구현 순서
 
@@ -60,6 +84,7 @@ int lca(int a, int b) {
 - 루트의 부모/깊이를 초기화하지 않는 것.
 - 무방향 트리에서 부모로 되돌아가는 간선을 막지 않는 것.
 - 사슬 트리에서 단순 상승이 질의마다 `O(N)`임을 놓치는 것.
+- 사슬처럼 깊은 트리를 재귀 `dfs()`로 전처리할 때 호출 스택 한도를 확인하지 않는 것. 필요하면 큐/명시적 스택으로 부모·깊이를 만든다.
 - binary lifting의 `LOG`, 테이블 구축 순서, 깊이 차 비트 처리를 틀리는 것.
 - 여러 테스트에서 인접 리스트와 깊이를 초기화하지 않는 것.
 
@@ -67,4 +92,3 @@ int lca(int a, int b) {
 
 - [11437.cpp](./11437.cpp): DFS로 부모·깊이를 만든 뒤 한 칸씩 올리는 기본 구현
 - [3584.cpp](./3584.cpp): 부모가 직접 주어지는 작은 LCA 변형
-

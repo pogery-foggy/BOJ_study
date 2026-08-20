@@ -17,39 +17,48 @@
 - 다르면 `max(dp[i-1][j], dp[i][j-1])`.
 - 복원 중 대각선 이동만 실제 문자를 답에 추가한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[9252.cpp](./9252.cpp)처럼 방향을 저장해 실제 LCS까지 복원한다.
+스타일 근거: [9252.cpp](./9252.cpp)의 전역 `dp`/`dir` 배열, 문자열 이름 `s1`/`s2`, 방향 문자 `D`/`I`/`J`, `solve()` 안의 역추적과 역순 출력 방식을 보존했다.
 
 ```cpp
-vector<vector<int>> dp(n + 1, vector<int>(m + 1));
-vector<vector<char>> dir(n + 1, vector<char>(m + 1));
+#define MAX_N 1000
 
-for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= m; ++j) {
-        if (A[i - 1] == B[j - 1]) {
-            dp[i][j] = dp[i - 1][j - 1] + 1;
-            dir[i][j] = 'D';
-        } else if (dp[i - 1][j] > dp[i][j - 1]) {
-            dp[i][j] = dp[i - 1][j]; dir[i][j] = 'U';
-        } else {
-            dp[i][j] = dp[i][j - 1]; dir[i][j] = 'L';
+int dp[MAX_N + 1][MAX_N + 1];
+char dir[MAX_N + 1][MAX_N + 1];
+string s1, s2;
+
+void solve() {
+    for (int i = 1; i <= s1.size(); i++) {
+        for (int j = 1; j <= s2.size(); j++) {
+            if (s1[i - 1] == s2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+                dir[i][j] = 'D';
+            } else if (dp[i - 1][j] > dp[i][j - 1]) {
+                dp[i][j] = dp[i - 1][j];
+                dir[i][j] = 'I';
+            } else {
+                dp[i][j] = dp[i][j - 1];
+                dir[i][j] = 'J';
+            }
         }
     }
-}
 
-string ans;
-for (int i = n, j = m; i && j; ) {
-    if (dir[i][j] == 'D') {
-        ans += A[i - 1];
-        --i; --j;
-    } else if (dir[i][j] == 'U') {
-        --i;
-    } else {
-        --j;
+    cout << dp[s1.size()][s2.size()] << "\n";
+    int i = s1.size(), j = s2.size();
+    string s = "";
+    while (i > 0 && j > 0) {
+        if (dir[i][j] == 'D') {
+            s += s1[i - 1];
+            i--;
+            j--;
+        } else if (dir[i][j] == 'I')
+            i--;
+        else
+            j--;
     }
+    for (int k = (int)s.size() - 1; k >= 0; k--) cout << s[k];
 }
-reverse(ans.begin(), ans.end());
 ```
 
 ## 빈 화면 구현 순서

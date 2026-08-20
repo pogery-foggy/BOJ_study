@@ -17,31 +17,41 @@
 - 꺼낸 거리 `d`가 현재 `dist[u]`와 다르면 낡은 항목이므로 버린다.
 - 음수 간선이 없을 때 최소 거리 순서가 깨지지 않는다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[1753.cpp](./1753.cpp)의 우선순위 큐 방식이다.
+스타일 근거: [1753.cpp](./1753.cpp)의 `INF` 매크로, 전역 `edge`와 `dist`, `pair<int, int>` 최소 힙, `cur`/`distance`/`next_dist` 변수명, `dijkstra()`와 `solve()` 함수 분리를 그대로 축약했다.
 
 ```cpp
-const long long INF = (1LL << 60);
-vector<long long> dist(n + 1, INF);
-priority_queue<pair<long long,int>,
-               vector<pair<long long,int>>,
-               greater<pair<long long,int>>> pq;
+#define INF 2100000000
 
-dist[start] = 0;
-pq.push({0, start});
+vector<pair<int, int>> edge[20001];
+vector<int> dist(20001, INF);
+int N, M, s;
 
-while (!pq.empty()) {
-    auto [d, u] = pq.top(); pq.pop();
-    if (d != dist[u]) continue;
-    for (auto [v, w] : graph[u]) {
-        long long nd = d + w;
-        if (nd < dist[v]) {
-            dist[v] = nd;
-            pq.push({nd, v});
+void dijkstra() {
+    dist[s] = 0;
+    priority_queue<pair<int, int>,
+        vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.push({dist[s], s});
+
+    while (!pq.empty()) {
+        int cur = pq.top().second;
+        int distance = pq.top().first;
+        pq.pop();
+        if (distance > dist[cur])
+            continue;
+
+        for (auto next : edge[cur]) {
+            int next_dist = next.second + distance;
+            if (dist[next.first] > next_dist) {
+                dist[next.first] = next_dist;
+                pq.push({next_dist, next.first});
+            }
         }
     }
 }
+
+void solve() { dijkstra(); }
 ```
 
 ## 빈 화면 구현 순서
@@ -69,4 +79,3 @@ while (!pq.empty()) {
 - [1504.cpp](./1504.cpp): 여러 다익스트라 결과로 필수 경유 순서를 비교
 - [1238.cpp](./1238.cpp): 왕복 최단 거리 구성
 - [13907.cpp](./13907.cpp): 간선 수를 상태에 더한 DP 결합형
-

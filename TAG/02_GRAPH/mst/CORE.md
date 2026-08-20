@@ -17,32 +17,55 @@
 - 비용 오름차순으로 본 첫 유효 간선은 현재 컷을 잇는 안전한 간선이다.
 - 정점이 `N`개면 정확히 `N-1`개를 선택했을 때 완성된다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[1922.cpp](./1922.cpp)처럼 최소 간선 우선 + DSU로 구현한다.
+스타일 근거: [1922.cpp](./1922.cpp)의 `priority_queue<pair<int, pair<int, int>>>`, 비용을 음수로 넣는 최소 힙 처리, 전역 부모 배열 `p`, `find_parent()`/`union_find()` 함수명과 `cnt`/`total_cost` 흐름을 보존했다.
 
 ```cpp
-struct Edge { int w, u, v; };
-priority_queue<tuple<int,int,int>,
-               vector<tuple<int,int,int>>,
-               greater<tuple<int,int,int>>> pq;
+priority_queue<pair<int, pair<int, int>>> pq;
+int N, M, p[1001];
 
-for (auto [u, v, w] : edges) pq.push({w, u, v});
-iota(parent.begin(), parent.end(), 0);
-
-long long total = 0;
-int used = 0;
-while (!pq.empty() && used < n - 1) {
-    auto [w, u, v] = pq.top(); pq.pop();
-    u = find(u); v = find(v);
-    if (u == v) continue;
-    unite(u, v);
-    total += w;
-    ++used;
+void init() {
+    cin >> N >> M;
+    for (int i = 0; i < M; i++) {
+        int u, v, c;
+        cin >> u >> v >> c;
+        pq.push({-c, {u, v}});
+    }
+    for (int i = 1; i <= N; i++)
+        p[i] = i;
 }
-if (used != n - 1) cout << -1; // 문제의 실패 출력에 맞춤
-else cout << total;
+
+int find_parent(int x) {
+    if (p[x] == x) return x;
+    return p[x] = find_parent(p[x]);
+}
+
+void union_find(int a, int b) {
+    a = find_parent(a);
+    b = find_parent(b);
+    if (a == b) return;
+    p[a] = b;
+}
+
+void solve() {
+    int cnt = 0;
+    int total_cost = 0;
+    while (!pq.empty() && cnt < N - 1) {
+        int c = -pq.top().first;
+        int u = pq.top().second.first;
+        int v = pq.top().second.second;
+        pq.pop();
+        if (find_parent(u) == find_parent(v)) continue;
+        total_cost += c;
+        union_find(u, v);
+        cnt++;
+    }
+    if (cnt == N - 1) cout << total_cost;
+}
 ```
+
+원본 문제는 연결 그래프를 보장하지만, 재사용 골격에서는 `pq.empty()`도 함께 검사해 빈 힙 접근을 막았다.
 
 ## 빈 화면 구현 순서
 
@@ -69,4 +92,3 @@ else cout << total;
 - [2887.cpp](./2887.cpp): 좌표별 인접 정점만 남겨 간선 수를 줄인 핵심 응용
 - [17472.cpp](./17472.cpp): 섬 라벨링·다리 생성 뒤 MST
 - [4792.cpp](./4792.cpp): 간선 정렬 순서를 바꿔 가능한 색 간선 수 범위를 판정
-

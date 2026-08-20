@@ -17,40 +17,102 @@
 - 양끝 더미를 두면 실제 `[l, r]`은 `kth(l-1)`을 루트로, `kth(r+1)`을 그 오른쪽 자식으로 만든 뒤 `right->left`에 모인다.
 - lazy가 있다면 회전/탐색 전에 루트부터 대상까지 `push`한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [16586.cpp](16586.cpp)의 중첩 `Splay::Node`, 생성자 초기화, `Splay` 안의 고정 노드 풀, 루트를 `tree`라고 부르는 방식, `update`/`rotate`/`splay`/`kth` 함수 구성을 축약했다. 비어 있는 `19589.cpp`는 근거로 사용하지 않았다.
 
 ```cpp
-struct Node {
-    Node *l=nullptr, *r=nullptr, *p=nullptr;
-    int value=0, cnt=1;
-};
-Node* root;
-int sz(Node* x) { return x ? x->cnt : 0; }
-void pull(Node* x) { if (x) x->cnt = 1 + sz(x->l) + sz(x->r); }
+#define MAX_N 1000010
 
-void rotate(Node* x) {
-    Node *p=x->p, *g=p->p, *b;
-    if (x == p->l) b=x->r, x->r=p, p->l=b;
-    else b=x->l, x->l=p, p->r=b;
-    if (b) b->p=p;
-    x->p=g; p->p=x;
-    if (!g) root=x;
-    else (g->l==p ? g->l : g->r)=x;
-    pull(p); pull(x);
-}
+struct Splay{
+    struct Node{
+        Node *l, *r, *p;
+        int cnt, d;
+        bool dummy;
 
-void splay(Node* x, Node* goal=nullptr) {
-    while (x->p != goal) {
-        Node *p=x->p, *g=p->p;
-        if (g == goal) rotate(x);
-        else if ((x==p->l) == (p==g->l)) rotate(p), rotate(x);
-        else rotate(x), rotate(x);
+        Node() : l(nullptr), r(nullptr), p(nullptr), cnt(0), d(0), dummy(true) {}
+        Node(int _d, bool _dummy = false) : l(nullptr), r(nullptr), p(nullptr),
+                                            cnt(1), d(_d), dummy(_dummy) {}
+    };
+
+    Node pool[MAX_N];
+    Node *tree;
+    int pool_cnt;
+
+    void update(Node *x){
+        if(!x) return;
+        x->cnt = 1;
+        if(x->l) x->cnt += x->l->cnt;
+        if(x->r) x->cnt += x->r->cnt;
     }
-    if (!goal) root=x;
-}
+
+    void rotate(Node *x){
+        Node *p = x->p;
+        Node *g = p->p;
+        Node *b = nullptr;
+
+        if(x == p->l){
+            b = x->r;
+            x->r = p;
+            p->l = b;
+        }
+        else{
+            b = x->l;
+            x->l = p;
+            p->r = b;
+        }
+
+        x->p = g;
+        p->p = x;
+        if(b) b->p = p;
+
+        if(g){
+            if(p == g->l) g->l = x;
+            else g->r = x;
+        }
+        else tree = x;
+
+        update(p);
+        update(x);
+    }
+
+    void splay(Node *x, Node *g = nullptr){
+        while(x->p != g){
+            Node *p = x->p;
+            Node *pp = p->p;
+            if(pp == g) rotate(x);
+            else if((x == p->l) == (p == pp->l)){
+                rotate(p);
+                rotate(x);
+            }
+            else{
+                rotate(x);
+                rotate(x);
+            }
+        }
+        if(!g) tree = x;
+        else update(g);
+    }
+
+    Node *kth(int k){
+        Node *x = tree;
+        while(true){
+            int left_cnt = x->l ? x->l->cnt : 0;
+            if(k < left_cnt) x = x->l;
+            else if(k == left_cnt){
+                splay(x);
+                return x;
+            }
+            else{
+                k -= left_cnt + 1;
+                x = x->r;
+            }
+        }
+    }
+};
 ```
 
-`kth(k)`는 왼쪽 크기와 k를 비교해 내려간 뒤 찾은 노드를 splay한다. `gather(l,r)`는 오른쪽 경계와 왼쪽 경계를 차례로 splay해 가운데 서브트리를 노출한다.
+실제 코드의 `push()`는 비어 있어 골격에서는 no-op 경로 전파를 넣지 않았다. 뒤집기 같은 lazy 상태를 추가한다면 회전 전에 조상부터 `push()`하는 부분도 함께 구현해야 한다.
 
 ## 빈 화면 구현 순서
 

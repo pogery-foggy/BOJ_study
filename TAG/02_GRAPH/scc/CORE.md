@@ -17,35 +17,43 @@
 - 스택에는 방문했지만 아직 어느 SCC에도 확정되지 않은 정점만 있다.
 - `low == order[u]`이면 `u`까지 pop한 정점들이 정확히 한 SCC다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[2150.cpp](./2150.cpp)의 Tarjan 구현을 핵심 상태만 남긴 형태다.
+스타일 근거: [2150.cpp](./2150.cpp)의 전역 `stack<int> group`, `check`/`is_group`/`edge`, `idx`/`parent`/`child` 명명과 SCC를 `temp` 벡터로 꺼내는 재귀 `dfs()` 구조를 축약했다.
 
 ```cpp
-int timer = 0, sccCnt = 0;
-vector<int> order(n + 1), sccId(n + 1), st;
-vector<char> finished(n + 1);
+stack<int> group;
+int check[10001];
+bool is_group[10001];
+vector<int> edge[10001];
+vector<vector<int>> groups;
+int num;
 
-int dfs(int u) {
-    order[u] = ++timer;
-    int low = order[u];
-    st.push_back(u);
+int dfs(int idx) {
+    check[idx] = ++num;
+    group.push(idx);
+    int parent = check[idx];
 
-    for (int v : graph[u]) {
-        if (!order[v]) low = min(low, dfs(v));
-        else if (!finished[v]) low = min(low, order[v]);
+    for (auto a : edge[idx]) {
+        int child = a;
+        if (!check[child])
+            parent = min(parent, dfs(child));
+        else if (!is_group[child])
+            parent = min(parent, check[child]);
     }
 
-    if (low == order[u]) {
+    if (parent == check[idx]) {
+        vector<int> temp;
         while (true) {
-            int x = st.back(); st.pop_back();
-            finished[x] = true;
-            sccId[x] = sccCnt;
-            if (x == u) break;
+            int cur = group.top();
+            group.pop();
+            is_group[cur] = true;
+            temp.push_back(cur);
+            if (cur == idx) break;
         }
-        ++sccCnt;
+        groups.push_back(temp);
     }
-    return low;
+    return parent;
 }
 ```
 
@@ -72,4 +80,3 @@ int dfs(int u) {
 - [4196.cpp](./4196.cpp): SCC 압축 뒤 시작 요소 수를 세는 응용
 - [1506.cpp](./1506.cpp): 각 SCC 안의 최소 비용 집계
 - [26146.cpp](./26146.cpp): 전체가 하나의 SCC인지 판정
-

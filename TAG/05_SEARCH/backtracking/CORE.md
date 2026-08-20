@@ -17,33 +17,55 @@
 - `used` 또는 충돌 배열: 현재 경로가 점유한 것만 `true`다.
 - 같은 깊이의 같은 값은 한 번만 고른다. 정렬 후 `last`로 건너뛰면 중복 수열을 막을 수 있다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [9663.cpp](./9663.cpp)의 전역 고정 배열, `put_queen`/`erase_queen` 함수 분리, `dfs(y)` 재귀, `init()` → `solve()` 구조를 축약했다.
 
 ```cpp
-int n, m;
-vector<int> a, path;
-vector<bool> used;
+#define MAX_N 15
 
-void dfs(int depth) {
-    if (depth == m) {
-        // path가 완성된 답
+int N, cnt = 0;
+bool con_x[MAX_N], con_cross_up[2 * MAX_N + 1], con_cross_down[2 * MAX_N + 1];
+
+void put_queen(int x, int y) {
+    con_x[x] = true;
+    con_cross_up[x + y] = true;
+    con_cross_down[y - x + MAX_N] = true;
+}
+
+void erase_queen(int x, int y) {
+    con_x[x] = false;
+    con_cross_up[x + y] = false;
+    con_cross_down[y - x + MAX_N] = false;
+}
+
+void dfs(int y) {
+    if (y == N) {
+        cnt++;
         return;
     }
-
-    int last = INT_MIN;
-    for (int i = 0; i < n; ++i) {
-        if (used[i] || a[i] == last) continue;
-        last = a[i];                 // 이 깊이에서만 중복 제거
-        used[i] = true;
-        path.push_back(a[i]);
-        dfs(depth + 1);
-        path.pop_back();             // 선택 전 상태로 복구
-        used[i] = false;
+    for (int x = 0; x < N; x++) {
+        if (con_x[x])
+            continue;
+        if (con_cross_up[x + y])
+            continue;
+        if (con_cross_down[y - x + MAX_N])
+            continue;
+        put_queen(x, y);
+        dfs(y + 1);
+        erase_queen(x, y);
     }
+}
+
+void init() { cin >> N; }
+
+void solve() {
+    dfs(0);
+    cout << cnt;
 }
 ```
 
-배치 충돌 문제는 `used[i]` 대신 열·대각선처럼 O(1)에 검사되는 상태를 둔다. 퀸 배치에서 `col[x]`, `diag1[x+y]`, `diag2[y-x+offset]`을 함께 켰다가 함께 끄는 방식이다.
+수열 문제에서는 [15654.cpp](./15654.cpp)처럼 전역 `is_visit[]`, `answer`를 켰다가 재귀 복귀 직후 원상복구한다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -65,4 +87,3 @@ void dfs(int depth) {
 
 - [15654.cpp](./15654.cpp): 정렬, `visited`, 깊이별 `last`, 선택/복구의 기본형
 - [9663.cpp](./9663.cpp): 열과 두 대각선 충돌을 O(1) 상태로 바꾼 N-Queen
-

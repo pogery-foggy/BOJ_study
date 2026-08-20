@@ -16,23 +16,38 @@
 - `^`, `$`는 시작과 끝, `[]`는 문자 집합, `?`는 0/1회, `+`는 1회 이상이다.
 - 반복 검색 시 다음 입력은 `match.suffix()`로 줄어들어야 한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [9342.cpp](./9342.cpp)의 전역 `string S`, `init()` 입력, `solve()` 안의 `regex re`와 `regex_match` 분기, 테스트케이스 반복 구조를 축약했다.
 
 ```cpp
-#include <regex>
+string S;
 
-regex rule(R"(^[A-F]?A+F+C+[A-F]?$)");
-if (regex_match(s, rule)) {
-    cout << "valid\n";
-} else {
-    cout << "invalid\n";
+void init() { cin >> S; }
+
+void solve() {
+    regex re("(^[A-F]?A+F+C+[A-F]?$)");
+
+    if (regex_match(S, re))
+        cout << "Infected!\n";
+    else
+        cout << "Good\n";
 }
 
-// 부분 일치 순회
-for (sregex_iterator it(s.begin(), s.end(), rule), end; it != end; ++it) {
-    string token = it->str();
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    int T;
+    cin >> T;
+    for (int testcase = 0; testcase < T; testcase++) {
+        init();
+        solve();
+    }
+    return 0;
 }
 ```
+
+부분 검색이 필요한 경우에는 [4828.cpp](./4828.cpp)처럼 `smatch tag_str`를 두고 `copy_line = tag_str.suffix()`로 다음 검색 범위를 줄인다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -54,4 +69,3 @@ for (sregex_iterator it(s.begin(), s.end(), rule), end; it != end; ++it) {
 
 - [9342.cpp](./9342.cpp): 시작/끝 앵커와 선택·반복을 이용한 전체 문자열 판정
 - [4828.cpp](./4828.cpp): 정규식으로 토큰을 찾고 스택으로 태그 중첩을 검증하는 혼합형
-

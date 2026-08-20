@@ -16,34 +16,51 @@
 - 현재 압축 좌표가 `cur`이면 오른쪽 구간 `(cur, max]`의 합이 앞선 더 큰 값의 수다.
 - 답은 최대 O(N²)이므로 `long long`으로 누적한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [7578.cpp](./7578.cpp)의 `#define MAX_N`, 전역 세그먼트 트리와 값→인덱스 배열, `(s,e,node,...)` 순서의 재귀 함수, `node << 1` 자식 표기를 축약했다.
 
 ```cpp
-vector<int> tree(4 * U);
+#define MAX_N 500001
 
-void update(int node, int s, int e, int idx) {
-    if (idx < s || e < idx) return;
-    ++tree[node];
-    if (s == e) return;
-    int m = (s + e) / 2;
-    update(node * 2, s, m, idx);
-    update(node * 2 + 1, m + 1, e, idx);
+int tree[MAX_N * 4];
+int fnd_idx[1000001];
+vector<pair<int, int>> arr;
+int N;
+
+void update(int s, int e, int node, int idx) {
+    if (idx < s || e < idx)
+        return;
+    tree[node]++;
+    if (s != e) {
+        int mid = (s + e) >> 1;
+        update(s, mid, node << 1, idx);
+        update(mid + 1, e, node << 1 | 1, idx);
+    }
 }
 
-int query(int node, int s, int e, int l, int r) {
-    if (r < s || e < l) return 0;
-    if (l <= s && e <= r) return tree[node];
-    int m = (s + e) / 2;
-    return query(node * 2, s, m, l, r)
-         + query(node * 2 + 1, m + 1, e, l, r);
+long long sum(int s, int e, int l, int r, int node) {
+    if (r < s || e < l)
+        return 0;
+    if (l <= s && e <= r)
+        return tree[node];
+    int mid = (s + e) >> 1;
+    return sum(s, mid, l, r, node << 1)
+         + sum(mid + 1, e, l, r, node << 1 | 1);
 }
 
-long long answer = 0;
-for (int cur : rank) {
-    answer += query(1, 0, U - 1, cur + 1, U - 1);
-    update(1, 0, U - 1, cur);
+void solve() {
+    long long answer = 0;
+    for (int i = 0; i < N; i++) {
+        int cur = arr[i].second;
+        update(0, N - 1, 1, cur);
+        answer += sum(0, N - 1, cur + 1, N - 1, 1);
+    }
+    cout << answer;
 }
 ```
+
+[7578.cpp](./7578.cpp)처럼 `update` 뒤에 오른쪽 구간을 묻는다. 현재 위치 `cur`은 질의 범위 `cur + 1 ... N - 1`에 포함되지 않으므로 자기 자신은 역전쌍으로 세지 않는다.
 
 ## 5. 빈 화면 구현 순서
 
@@ -66,4 +83,3 @@ for (int cur : rank) {
 - [7578.cpp](./7578.cpp): 첫 배열의 위치 맵으로 두 번째 배열을 바꾸고 교차선을 계산
 - [2517.cpp](./2517.cpp): 좌표 압축 후 앞선 더 큰 원소 수로 현재 등수 계산
 - [1615.cpp](./1615.cpp): 간선 정렬과 역전쌍을 결합한 교차 개수
-

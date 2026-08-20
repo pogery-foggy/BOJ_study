@@ -17,28 +17,32 @@
 - 두 점이 어떤 경계를 서로 다른 상태로 통과하는지는 `inside(start) != inside(end)`로 표현한다.
 - 격자 입체의 옆면은 경계 높이와 이웃보다 증가한 높이만 합치면 중복 없이 센다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [11758.cpp](11758.cpp)의 좌표를 전역 변수로 두는 방식, 한 줄 `init()`, 외적 값을 `sign`에 저장한 뒤 `if`로 `0/1/-1`을 출력하는 `solve()` 구성을 그대로 축약했다.
 
 ```cpp
-struct Point { long long x, y; };
+using namespace std;
 
-long long cross(Point a, Point b, Point c) {
-    return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+long long x1, x2, x3, y1, y2, y3;
+
+void init() {
+    cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3;
 }
 
-int ccw(Point a, Point b, Point c) {
-    long long v = cross(a,b,c);
-    return (v > 0) - (v < 0);
+void solve() {
+    long long sign = (x2 - x1) * (y3 - y1)
+                   - (x3 - x1) * (y2 - y1);
+    if (sign == 0)
+        cout << 0;
+    else if (sign > 0)
+        cout << 1;
+    else
+        cout << -1;
 }
-
-bool inside_circle(Point p, Point center, long long r) {
-    long long dx=p.x-center.x, dy=p.y-center.y;
-    return dx*dx + dy*dy < r*r;
-}
-
-if (inside_circle(start,c,r) != inside_circle(finish,c,r))
-    ++crossed_boundaries;
 ```
+
+원본은 문제 범위에 맞춰 `int`를 썼지만, 재사용 골격에서는 곱셈 오버플로를 피하도록 좌표와 `sign`만 `long long`으로 넓혔다. 구조체가 필요한 복합 기하에서만 [1708.cpp](../convex_hull/1708.cpp)처럼 `Point`를 도입한다.
 
 ## 빈 화면 구현 순서
 

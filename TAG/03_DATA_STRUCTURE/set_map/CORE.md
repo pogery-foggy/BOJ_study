@@ -16,22 +16,39 @@
 - `multiset`은 같은 값의 개수까지 보존하며 `erase(iterator)`는 딱 하나만 지운다.
 - 정렬이 필요 없으면 평균 O(1) `unordered_map/set`, 순서·양끝이 필요하면 O(log N) `map/set`이다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1620.cpp](1620.cpp)의 전역 문자열 배열 `answer`, `map<string, int> dogam`, `init()`에서 양방향 표를 동시에 만들고 `solve()`에서 첫 글자로 숫자 질의를 구별하는 구성을 그대로 축약했다.
 
 ```cpp
-vector<string> by_id(n + 1);
-unordered_map<string, int> by_name;
+#define MAX_N 100001
+using namespace std;
 
-for (int i = 1; i <= n; ++i) {
-    cin >> by_id[i];
-    by_name[by_id[i]] = i;
+int N, M;
+string answer[MAX_N];
+map<string, int> dogam;
+
+void init() {
+    cin >> N >> M;
+    for (int i = 1; i <= N; i++) {
+        cin >> answer[i];
+        dogam.insert({answer[i], i});
+    }
 }
 
-multiset<int> ms;
-ms.insert(x);
-if (!ms.empty()) ms.erase(ms.begin());       // 최솟값 하나
-if (!ms.empty()) ms.erase(prev(ms.end()));   // 최댓값 하나
+void solve() {
+    string user_in;
+    for (int i = 0; i < M; i++) {
+        cin >> user_in;
+        if ('0' <= user_in[0] && user_in[0] <= '9')
+            cout << answer[stoi(user_in)] << "\n";
+        else
+            cout << dogam[user_in] << "\n";
+    }
+}
 ```
+
+기존 골격의 `unordered_map`·`vector`는 이 대표 풀이의 선택이 아니므로 `map`·고정 배열로 되돌렸다. 양끝 삭제가 핵심인 문제는 [7662.cpp](7662.cpp)의 `multiset` 사용을 따로 참고한다.
 
 ## 빈 화면 구현 순서
 

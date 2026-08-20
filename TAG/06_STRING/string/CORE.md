@@ -16,39 +16,47 @@
 - 스택/버퍼에는 아직 출력하지 않은 현재 단어만 들어 있다.
 - 패턴 탐색에서는 `correct`가 현재 위치까지 연속된 패턴 조각의 수를 뜻한다.
 
-## 4. C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [17413.cpp](./17413.cpp)의 전역 문자열, `getline` 입력, 지역 `stack<char>`, 인덱스 `for`문과 스택을 직접 비우는 출력 방식을 축약했다. 원본에 없던 람다는 쓰지 않았다.
 
 ```cpp
 string s;
-getline(cin, s);
-string word;
-bool inTag = false;
 
-auto flushReverse = [&]() {
-    reverse(word.begin(), word.end());
-    cout << word;
-    word.clear();
-};
+void init() { getline(cin, s); }
 
-for (char c : s) {
-    if (c == '<') {
-        flushReverse();
-        inTag = true;
-        cout << c;
-    } else if (c == '>') {
-        inTag = false;
-        cout << c;
-    } else if (inTag) {
-        cout << c;
-    } else if (c == ' ') {
-        flushReverse();
-        cout << ' ';
-    } else {
-        word += c;
+void solve() {
+    stack<char> st;
+    for (int i = 0; i < s.size(); i++) {
+        if (s[i] == '<') {
+            while (!st.empty()) {
+                char cur = st.top();
+                cout << cur;
+                st.pop();
+            }
+            cout << '<';
+            while (s[++i] != '>')
+                cout << s[i];
+            cout << '>';
+        } else if (s[i] == ' ') {
+            while (!st.empty()) {
+                char cur = st.top();
+                cout << cur;
+                st.pop();
+            }
+            cout << ' ';
+        } else
+            st.push(s[i]);
+    }
+    while (!st.empty()) {
+        char cur = st.top();
+        cout << cur;
+        st.pop();
     }
 }
-flushReverse();
 ```
+
+원본 마지막의 불필요한 `cout << " ";`는 결과에 여분 공백을 만들 수 있어 골격에서는 제외했다. 단순 빈도 문제라면 [10808.cpp](./10808.cpp)처럼 전역 `alpha[26]`와 범위 `for`문을 쓴다.
 
 ## 5. 빈 화면 구현 순서
 

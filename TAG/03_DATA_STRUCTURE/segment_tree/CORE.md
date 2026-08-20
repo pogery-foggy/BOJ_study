@@ -16,34 +16,50 @@
 - query의 구간 밖 반환값은 merge의 항등원이어야 한다.
 - lazy 값은 "이 노드 구간에는 반영됐지만 자식에는 아직 전달하지 않은 연산"이다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [2042.cpp](2042.cpp)의 전역 `tree`, `arr`, 리프 노드를 기억하는 `arr_index`, `(s, e, node)` 순서의 `init_tree`·`sum`, 리프에서 루트까지 올라가는 반복형 `update`를 그대로 축약했다.
 
 ```cpp
-long long tree[4 * MAX_N];
+#define MAX_N 1000000
+typedef long long ll;
+using namespace std;
 
-long long build(int node, int s, int e) {
-    if (s == e) return tree[node] = a[s];
-    int m = (s + e) / 2;
-    return tree[node] = build(node*2,s,m) + build(node*2+1,m+1,e);
+int N, arr_index[MAX_N + 1];
+ll tree[4 * MAX_N], arr[MAX_N];
+
+ll init_tree(int s, int e, int node) {
+    if (s == e) {
+        arr_index[s + 1] = node;
+        return tree[node] = arr[s];
+    }
+    int mid = (s + e) >> 1;
+    return tree[node] = init_tree(s, mid, node << 1)
+                      + init_tree(mid + 1, e, node << 1 | 1);
 }
 
-void update(int node, int s, int e, int idx, long long value) {
-    if (s == e) { tree[node] = value; return; }
-    int m = (s + e) / 2;
-    if (idx <= m) update(node*2,s,m,idx,value);
-    else update(node*2+1,m+1,e,idx,value);
-    tree[node] = tree[node*2] + tree[node*2+1];
+void update(int idx, ll change) {
+    int fnd = arr_index[idx];
+    tree[fnd] = change;
+    fnd /= 2;
+    while (fnd > 0) {
+        tree[fnd] = tree[fnd << 1] + tree[fnd << 1 | 1];
+        fnd /= 2;
+    }
 }
 
-long long query(int node, int s, int e, int l, int r) {
-    if (e < l || r < s) return 0;
-    if (l <= s && e <= r) return tree[node];
-    int m = (s + e) / 2;
-    return query(node*2,s,m,l,r) + query(node*2+1,m+1,e,l,r);
+ll sum(int s, int e, int l, int r, int node) {
+    if (l > e || r < s)
+        return 0;
+    if (l <= s && e <= r)
+        return tree[node];
+    int mid = (s + e) / 2;
+    return sum(s, mid, l, r, node << 1)
+         + sum(mid + 1, e, l, r, node << 1 | 1);
 }
 ```
 
-구간 덧셈이라면 완전 포함에서 `tree[node] += len * x`, 자식의 `lazy += x`; 내려가기 직전에 `push`한다.
+구간 갱신 문제에서는 [10999.cpp](10999.cpp)처럼 같은 전역 배열·재귀 인자 순서를 유지한 채 `lazy`와 전파 함수를 추가한다.
 
 ## 빈 화면 구현 순서
 

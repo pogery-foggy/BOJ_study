@@ -18,27 +18,53 @@
 - 처리한 정점 수가 `N`보다 작으면 사이클이 있다.
 - [1005.cpp](./1005.cpp)의 `finish[v]`는 `v`까지 완료하는 최소 필요 시간의 최댓값이다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1005.cpp](./1005.cpp)의 전역 `D`/`indegree`/`sum_time` 배열과 큐, `edge.resize(N + 1)`, `init()`에서 진입차수 0을 넣고 `solve()`에서 `cur`/`next`로 순회하는 구조를 보존했다.
 
 ```cpp
+int N, K, D[1001], W;
+int indegree[1001], sum_time[1001];
+vector<vector<int>> edge;
 queue<int> q;
-vector<long long> finish(n + 1);
-for (int i = 1; i <= n; ++i) {
-    finish[i] = duration[i];
-    if (indegree[i] == 0) q.push(i);
-}
 
-int processed = 0;
-while (!q.empty()) {
-    int u = q.front(); q.pop();
-    ++processed;
-    for (int v : graph[u]) {
-        finish[v] = max(finish[v], finish[u] + duration[v]);
-        if (--indegree[v] == 0) q.push(v);
+void init() {
+    cin >> N >> K;
+    edge.resize(N + 1);
+    for (int i = 1; i <= N; i++) {
+        cin >> D[i];
+        edge[i].clear();
+        indegree[i] = 0;
+        sum_time[i] = D[i];
+    }
+    for (int i = 0; i < K; i++) {
+        int x, y;
+        cin >> x >> y;
+        edge[x].push_back(y);
+        indegree[y]++;
+    }
+    cin >> W;
+    for (int i = 1; i <= N; i++) {
+        if (!indegree[i]) q.push(i);
     }
 }
-if (processed < n) /* cycle */;
+
+void solve() {
+    while (!q.empty()) {
+        int cur = q.front();
+        q.pop();
+        for (auto next : edge[cur]) {
+            if (sum_time[cur] + D[next] > sum_time[next])
+                sum_time[next] = sum_time[cur] + D[next];
+            indegree[next]--;
+            if (!indegree[next]) q.push(next);
+        }
+    }
+    cout << sum_time[W] << "\n";
+}
 ```
+
+순서만 구할 때도 같은 큐 구조를 쓰고, 사이클 판정이 필요하면 실제로 꺼낸 정점 수를 별도로 센다.
 
 ## 빈 화면 구현 순서
 
@@ -61,4 +87,3 @@ if (processed < n) /* cycle */;
 ## 대표 로컬 풀이
 
 - [1005.cpp](./1005.cpp): 위상 정렬 중 선행 경로의 최대 완료 시간을 함께 전파하는 구현
-

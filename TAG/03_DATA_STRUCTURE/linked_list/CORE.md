@@ -16,38 +16,44 @@
 - 사용자 코드의 `current`는 커서 바로 왼쪽 노드를 뜻한다.
 - 항상 `x->next->prev == x`, `x->prev->next == x`가 성립해야 한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1406.cpp](1406.cpp)의 `Node { data, next, prev }`, 동적으로 만든 `head`·`tail`, 커서 왼쪽 노드를 가리키는 전역 `current`, 삽입·삭제 함수의 포인터 연결 순서를 그대로 축약했다.
 
 ```cpp
 struct Node {
-    char value;
-    Node *prev = nullptr, *next = nullptr;
+    char data;
+    Node *next;
+    Node *prev;
 };
 
-Node head, tail;
-Node* cursor = &head; // 커서 왼쪽 문자
+Node *head = new Node, *tail = new Node, *current;
 
-void init_list() {
-    head.next = &tail;
-    tail.prev = &head;
+void get_node(char user_in, Node *cur) {
+    Node *p_new = new Node;
+    p_new->data = user_in;
+
+    p_new->next = cur->next;
+    p_new->prev = cur;
+    cur->next->prev = p_new;
+    cur->next = p_new;
 }
 
-void insert_after(Node* cur, char c) {
-    Node* x = new Node{c, cur, cur->next};
-    cur->next->prev = x;
-    cur->next = x;
-    cursor = x;
+void del_node(Node *cur) {
+    cur->next->prev = cur->prev;
+    cur->prev->next = cur->next;
 }
 
-void erase_cursor() {
-    if (cursor == &head) return;
-    Node* victim = cursor;
-    cursor = victim->prev;
-    cursor->next = victim->next;
-    victim->next->prev = cursor;
-    delete victim;
+void init() {
+    head->next = tail;
+    head->prev = nullptr;
+    tail->next = nullptr;
+    tail->prev = head;
+    current = head;
 }
 ```
+
+명령 처리에서도 삽입 뒤에는 `current = current->next`, 삭제 뒤에는 먼저 연결을 끊고 `current = current->prev`로 옮기는 흐름을 유지한다.
 
 ## 빈 화면 구현 순서
 

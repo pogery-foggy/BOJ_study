@@ -17,38 +17,55 @@
 - hull에는 처리한 점들의 올바른 반시계 볼록 경계만 남는다.
 - 끝점만 남길 때 새 점이 `ccw <= 0`이면 마지막 점을 pop한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1708.cpp](1708.cpp)의 `Point`, 전역 `stars`, 기준점을 `stars[0]`으로 직접 참조하는 `compare`, 수동 교환, `vector<Point> convex`와 인덱스 반복문을 그대로 축약했다.
 
 ```cpp
-struct Point { long long x, y; };
+struct Point{
+    long long x, y;
+};
+vector<Point> stars;
+int N;
 
-long long ccw(Point a, Point b, Point c) {
-    return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+long long ccw(Point a, Point b, Point c){
+    long long x1 = b.x - a.x;
+    long long y1 = b.y - a.y;
+    long long x2 = c.x - a.x;
+    long long y2 = c.y - a.y;
+    return x1 * y2 - x2 * y1;
 }
-long long dist2(Point a, Point b) {
-    long long x=a.x-b.x, y=a.y-b.y;
-    return x*x + y*y;
+
+long long dist(Point a, Point b){
+    long long dx = a.x - b.x;
+    long long dy = a.y - b.y;
+    return dx * dx + dy * dy;
 }
 
-int pivot = min_element(p.begin(), p.end(), [](auto a, auto b) {
-    return tie(a.y,a.x) < tie(b.y,b.x);
-}) - p.begin();
-swap(p[0], p[pivot]);
-Point base = p[0];
+bool compare(Point a, Point b){
+    long long direction = ccw(stars[0], a, b);
+    if(direction > 0) return true;
+    if(direction < 0) return false;
+    return dist(stars[0], a) < dist(stars[0], b);
+}
 
-sort(p.begin()+1, p.end(), [&](Point a, Point b) {
-    long long turn = ccw(base,a,b);
-    return turn ? turn > 0 : dist2(base,a) < dist2(base,b);
-});
-
-vector<Point> hull;
-for (Point x : p) {
-    while (hull.size() >= 2 &&
-           ccw(hull[hull.size()-2], hull.back(), x) <= 0)
-        hull.pop_back();
-    hull.push_back(x);
+void solve() {
+    vector<Point> convex;
+    convex.push_back(stars[0]);
+    convex.push_back(stars[1]);
+    for(int i = 2; i < N; i++){
+        while(convex.size() >= 2){
+            Point a = convex[convex.size() - 2];
+            Point b = convex[convex.size() - 1];
+            if(ccw(a, b, stars[i]) > 0) break;
+            convex.pop_back();
+        }
+        convex.push_back(stars[i]);
+    }
 }
 ```
+
+기준점 선택도 실제 코드처럼 `y`가 작고, 같으면 `x`가 작은 인덱스를 반복문으로 찾아 `stars[0]`과 바꾼 뒤 `sort(stars.begin()+1, stars.end(), compare)`한다.
 
 ## 빈 화면 구현 순서
 

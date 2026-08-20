@@ -17,29 +17,37 @@
 - 경로 압축은 `find` 중 지나온 정점을 대표에 직접 붙인다.
 - 크기/랭크가 작은 트리를 큰 트리 밑에 붙여 높이를 억제한다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
 
-[1043.cpp](./1043.cpp)의 부모 배열 방식을 경로 압축과 크기 합치기로 정리했다.
+스타일 근거: [1043.cpp](./1043.cpp)의 전역 부모 배열 `p`, `find_parent()`/`Union()`/`p_check()` 함수 분리, 재귀 경로 압축과 1부터 직접 초기화하는 방식을 보존했다.
 
 ```cpp
-vector<int> parent(n + 1), sz(n + 1, 1);
-iota(parent.begin(), parent.end(), 0);
+int p[51];
+int N;
 
-int find(int x) {
-    if (parent[x] == x) return x;
-    return parent[x] = find(parent[x]);
+int find_parent(int a) {
+    if (a == p[a])
+        return a;
+    return p[a] = find_parent(p[a]);
 }
 
-bool unite(int a, int b) {
-    a = find(a); b = find(b);
-    if (a == b) return false;
-    if (sz[a] < sz[b]) swap(a, b);
-    parent[b] = a;
-    sz[a] += sz[b];
-    return true;
+void Union(int a, int b) {
+    a = find_parent(a);
+    b = find_parent(b);
+    if (a == b) return;
+    p[b] = a;
 }
 
-bool same(int a, int b) { return find(a) == find(b); }
+bool p_check(int a, int b) {
+    a = find_parent(a);
+    b = find_parent(b);
+    return a == b;
+}
+
+void init_parent() {
+    for (int i = 1; i <= N; i++)
+        p[i] = i;
+}
 ```
 
 ## 빈 화면 구현 순서
@@ -62,4 +70,3 @@ bool same(int a, int b) { return find(a) == find(b); }
 ## 대표 로컬 풀이
 
 - [1043.cpp](./1043.cpp): 파티 참가자 집합을 합친 뒤 진실 집합과의 연결을 판정하는 구현
-

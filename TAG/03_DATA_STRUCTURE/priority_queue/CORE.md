@@ -16,29 +16,37 @@
 - 최소 힙은 `priority_queue<T, vector<T>, greater<T>>`다.
 - 구간 스케줄링에서는 힙에 "현재 사용 중인 자원의 종료 시각"만 남긴다.
 
-## C++ 최소 구현 골격
+## 내 코드 스타일 C++ 최소 구현 골격
+
+스타일 근거: [1927.cpp](1927.cpp)의 전역 최소 힙, `init()`/`solve()` 분리, `user_in`이라는 입력 변수와 `if (!user_in)` 명령 분기를 그대로 보존했다.
 
 ```cpp
+using namespace std;
+
 priority_queue<long long, vector<long long>, greater<long long>> pq;
+int N;
 
-for (long long x : values) pq.push(x);
-while (!pq.empty()) {
-    long long best = pq.top();
-    pq.pop();
-    // best를 사용하고 필요하면 새 후보 push
+void init() { cin >> N; }
+
+void solve() {
+    long long user_in;
+    for (int i = 0; i < N; i++) {
+        cin >> user_in;
+        if (!user_in) {
+            if (pq.empty()) {
+                cout << "0\n";
+            } else {
+                cout << pq.top() << "\n";
+                pq.pop();
+            }
+        } else {
+            pq.push(user_in);
+        }
+    }
 }
 ```
 
-강의실 수 패턴:
-
-```cpp
-sort(intervals.begin(), intervals.end());
-for (auto [s, e] : intervals) {
-    if (!pq.empty() && pq.top() <= s) pq.pop();
-    pq.push(e);
-}
-cout << pq.size();
-```
+강의실·작업 스케줄 문제도 같은 `pq.top()` 확인 뒤 `pop()`/`push()` 순서를 쓰되, 실제 코드에 없던 구조적 바인딩은 골격에 넣지 않는다.
 
 ## 빈 화면 구현 순서
 
