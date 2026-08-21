@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#081521">
+  <title>BOJ Theory Map</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#document-view">본문으로 건너뛰기</a>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="menu-button" class="icon-button mobile-only" type="button" aria-label="학습 목록 열기" aria-expanded="false">
+        <span aria-hidden="true">☰</span>
+      </button>
+      <button id="brand-button" class="brand" type="button" aria-label="학습 순서로 이동">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-copy">
+          <strong>THEORY MAP</strong>
+          <small>BOJ MEMORY REBUILD</small>
+        </span>
+      </button>
+    </div>
+
+    <div class="search-wrap" role="search">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <input id="search-input" type="search" autocomplete="off" placeholder="알고리즘 찾기" aria-label="알고리즘 찾기">
+      <kbd>Ctrl K</kbd>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="top-progress" aria-label="전체 학습 진행률">
+        <span id="top-progress-label">0 / 62</span>
+      </div>
+      <button id="theme-button" class="icon-button" type="button" aria-label="밝은 화면으로 전환">
+        <span class="theme-dark" aria-hidden="true">☀</span>
+        <span class="theme-light" aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="알고리즘 학습 목차">
+      <section class="progress-card">
+        <div id="progress-ring" class="progress-ring">
+          <svg viewBox="0 0 44 44" aria-hidden="true">
+            <circle class="progress-track" cx="22" cy="22" r="19"></circle>
+            <circle id="progress-circle" class="progress-value" cx="22" cy="22" r="19" pathLength="100"></circle>
+          </svg>
+          <div>
+            <strong id="progress-percent">0%</strong>
+            <span>복원</span>
+          </div>
+        </div>
+        <div class="progress-copy">
+          <span class="eyebrow">LOCAL PROGRESS</span>
+          <strong id="progress-count">0 / 62 완료</strong>
+          <button id="continue-button" class="text-button" type="button">다음 복원 항목 →</button>
+        </div>
+      </section>
+
+      <button id="study-nav-button" class="study-nav-button" type="button">
+        <span class="nav-glyph" aria-hidden="true">⌂</span>
+        <span><strong>전체 학습 순서</strong><small>9단계 복원 지도</small></span>
+      </button>
+
+      <div class="sidebar-label">
+        <span>STUDY ROUTE</span>
+        <span id="search-result-count"></span>
+      </div>
+      <nav id="phase-navigation" class="phase-navigation"></nav>
+      <p id="sidebar-empty" class="sidebar-empty" hidden>일치하는 알고리즘이 없습니다.</p>
+
+      <footer class="sidebar-footer">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>127.0.0.1 · 오프라인</span>
+      </footer>
+    </aside>
+
+    <button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="학습 목록 닫기" hidden></button>
+
+    <main class="main-area">
+      <div class="document-toolbar">
+        <div class="toolbar-left">
+          <button id="back-button" class="toolbar-button" type="button" title="이전 화면 (Alt+←)">
+            <span aria-hidden="true">←</span><span>뒤로</span>
+          </button>
+          <button id="home-button" class="toolbar-button" type="button" title="전체 학습 순서">
+            <span aria-hidden="true">⌂</span><span>학습 순서</span>
+          </button>
+        </div>
+        <div id="breadcrumb" class="breadcrumb" aria-label="현재 위치"></div>
+        <div class="toolbar-right">
+          <button id="complete-button" class="toolbar-button complete-button" type="button" hidden>
+            <span class="complete-check" aria-hidden="true">✓</span><span>복원 완료</span>
+          </button>
+          <button id="reload-button" class="icon-button small" type="button" title="현재 파일 다시 읽기" aria-label="현재 파일 다시 읽기">↻</button>
+        </div>
+      </div>
+
+      <div id="loading-view" class="loading-view" aria-live="polite">
+        <div class="loading-line wide"></div>
+        <div class="loading-line"></div>
+        <div class="loading-line short"></div>
+      </div>
+
+      <section id="error-view" class="error-view" hidden>
+        <span class="error-code">!</span>
+        <h1>문서를 열 수 없습니다</h1>
+        <p id="error-message"></p>
+        <button id="error-home-button" class="primary-button" type="button">학습 순서로 돌아가기</button>
+      </section>
+
+      <div id="reader-layout" class="reader-layout" hidden>
+        <article id="document-view" class="document-view" tabindex="-1"></article>
+        <aside id="document-toc" class="document-toc" aria-label="현재 문서 목차"></aside>
+      </div>
+
+      <nav id="document-pagination" class="document-pagination" aria-label="이전 및 다음 알고리즘" hidden>
+        <button id="previous-button" class="page-button previous" type="button"></button>
+        <button id="next-button" class="page-button next" type="button"></button>
+      </nav>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div class="noscript">이 학습 웹은 JavaScript가 필요합니다.</div>
+  </noscript>
+</body>
+</html>
